@@ -92,6 +92,7 @@ import { getPatients, getProducts, getInvoices, getAppointments, getPurchaseOrde
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/context/language-context';
 import BestSellerByPriceRange from '@/components/best-seller-by-price-range';
+import { InvoiceForm } from '@/components/invoice-form';
 
 // Reusable Stat Card Component
 const StatCard = ({ title, icon: Icon, value, description, isLoading }: { title: string, icon: React.ElementType, value: string, description: string, isLoading?: boolean }) => {
@@ -763,8 +764,59 @@ function PatientDashboard() {
 
 
 function InvoiceManagementSection() {
-    const [invoices, setInvoices] = React.useState<Invoice[]>([]);
+    const [view, setView] = React.useState<'list' | 'create'>('list');
     const [selectedInvoice, setSelectedInvoice] = React.useState<Invoice | null>(null);
+
+    const handleCreateInvoice = (newInvoiceData: Omit<Invoice, 'id' | 'status' | 'patientId'>) => {
+        const newInvoice: Invoice = {
+            id: `INV-${Date.now()}`,
+            patientId: `PAT-XYZ`, // temp
+            status: 'Unpaid',
+            ...newInvoiceData
+        }
+        setSelectedInvoice(newInvoice);
+        setView('list'); // Switch to showing the new invoice
+    }
+
+    if (selectedInvoice) {
+        return (
+            <div>
+                <Button onClick={() => setSelectedInvoice(null)} variant="outline" className="mb-4">
+                    &larr; Back to Invoices
+                </Button>
+                <InvoiceDisplay invoice={selectedInvoice} />
+            </div>
+        )
+    }
+
+    return (
+        <Card>
+            <CardHeader className="flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Invoice Management</CardTitle>
+                    <CardDescription>Review past invoices or create a new one.</CardDescription>
+                </div>
+                <Button onClick={() => setView(view === 'list' ? 'create' : 'list')}>
+                    {view === 'list' ? (
+                        <><PlusCircle className="mr-2 h-4 w-4" /> Create Invoice</>
+                    ) : (
+                        <>&larr; Back to List</>
+                    )}
+                </Button>
+            </CardHeader>
+            <CardContent>
+                {view === 'list' ? (
+                    <InvoiceList onSelectInvoice={setSelectedInvoice} />
+                ) : (
+                    <InvoiceForm onCreate={handleCreateInvoice} />
+                )}
+            </CardContent>
+        </Card>
+    );
+}
+
+function InvoiceList({ onSelectInvoice }: { onSelectInvoice: (invoice: Invoice) => void }) {
+    const [invoices, setInvoices] = React.useState<Invoice[]>([]);
     const { formatCurrency, registerValue, convertedValues } = useCurrency();
     const [isLoading, setIsLoading] = React.useState(true);
 
@@ -784,57 +836,40 @@ function InvoiceManagementSection() {
         });
     }, [registerValue, invoices]);
 
-    if (selectedInvoice) {
-        return (
-            <div>
-                <Button onClick={() => setSelectedInvoice(null)} variant="outline" className="mb-4">
-                    &larr; Back to Invoices
-                </Button>
-                <InvoiceDisplay invoice={selectedInvoice} />
-            </div>
-        )
-    }
-
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Invoice History</CardTitle>
-                <CardDescription>Review past and present invoices.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                {isLoading ? (
-                    <Skeleton className="h-64 w-full" />
-                ) : (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>ID</TableHead>
-                                <TableHead>Patient</TableHead>
-                                <TableHead>Due Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                                <TableHead></TableHead>
+        <>
+            {isLoading ? (
+                <Skeleton className="h-64 w-full" />
+            ) : (
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>ID</TableHead>
+                            <TableHead>Patient</TableHead>
+                            <TableHead>Due Date</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Total</TableHead>
+                            <TableHead></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {invoices.map(invoice => (
+                            <TableRow key={invoice.id}>
+                                <TableCell className="font-mono">{invoice.id}</TableCell>
+                                <TableCell>{invoice.patientName}</TableCell>
+                                <TableCell>{invoice.dueDate}</TableCell>
+                                <TableCell><Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Overdue' ? 'destructive' : 'secondary'}>{invoice.status}</Badge></TableCell>
+                                <TableCell className="text-right">{formatCurrency(convertedValues[`inv_manage_${invoice.id}`] ?? invoice.total)}</TableCell>
+                                <TableCell className="text-right">
+                                    <Button variant="ghost" size="sm" onClick={() => onSelectInvoice(invoice)}>View</Button>
+                                </TableCell>
                             </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {invoices.map(invoice => (
-                                <TableRow key={invoice.id}>
-                                    <TableCell className="font-mono">{invoice.id}</TableCell>
-                                    <TableCell>{invoice.patientName}</TableCell>
-                                    <TableCell>{invoice.dueDate}</TableCell>
-                                    <TableCell><Badge variant={invoice.status === 'Paid' ? 'default' : 'secondary'}>{invoice.status}</Badge></TableCell>
-                                    <TableCell className="text-right">{formatCurrency(convertedValues[`inv_manage_${invoice.id}`] ?? invoice.total)}</TableCell>
-                                    <TableCell className="text-right">
-                                        <Button variant="ghost" size="sm" onClick={() => setSelectedInvoice(invoice)}>View</Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
-            </CardContent>
-        </Card>
-    );
+                        ))}
+                    </TableBody>
+                </Table>
+            )}
+        </>
+    )
 }
 
 const FeatureCard = ({ title, description, children, isLoading }: { title: string, description: string, children: React.ReactNode, isLoading?: boolean }) => (
@@ -1258,9 +1293,12 @@ export default function UnifiedDashboard() {
                 <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 h-auto">
                     <TabsTrigger value="dashboard"><LayoutDashboard className="w-4 h-4 mr-2" />{t('tab_dashboard')}</TabsTrigger>
 
+                    {(userRole === 'admin' || userRole === 'owner' || userRole === 'staff') && (
+                        <TabsTrigger value="invoices"><Receipt className="w-4 h-4 mr-2" />{t('tab_invoices')}</TabsTrigger>
+                    )}
+
                     {userRole === 'admin' && (
                         <>
-                            <TabsTrigger value="invoices"><Receipt className="w-4 h-4 mr-2" />{t('tab_invoices')}</TabsTrigger>
                             <TabsTrigger value="reports"><LineChart className="w-4 h-4 mr-2" />{t('tab_reports')}</TabsTrigger>
                             <TabsTrigger value="products"><Package className="w-4 h-4 mr-2" />{t('tab_products')}</TabsTrigger>
                         </>
@@ -1282,7 +1320,6 @@ export default function UnifiedDashboard() {
                         <>
                             <TabsTrigger value="patients"><Users className="w-4 h-4 mr-2" />{t('tab_patients')}</TabsTrigger>
                             <TabsTrigger value="appointments"><BookUser className="w-4 h-4 mr-2" />{t('tab_appointments')}</TabsTrigger>
-                            <TabsTrigger value="invoices"><Receipt className="w-4 h-4 mr-2" />{t('tab_invoices')}</TabsTrigger>
                             <TabsTrigger value="orders"><ClipboardList className="w-4 h-4 mr-2" />{t('tab_orderSlips')}</TabsTrigger>
                             <TabsTrigger value="loyalty"><Star className="w-4 h-4 mr-2" />{t('tab_loyalty')}</TabsTrigger>
                             <TabsTrigger value="products"><Package className="w-4 h-4 mr-2" />{t('tab_products')}</TabsTrigger>
@@ -1321,7 +1358,7 @@ export default function UnifiedDashboard() {
                     </TabsContent>
                 )}
 
-                {(userRole === 'owner' || userRole === 'admin') && (
+                {(userRole === 'owner' || userRole === 'admin' || userRole === 'staff') && (
                     <TabsContent value="invoices">
                         <FeatureCard title={t('feature_invoiceManagement_title')} description={t('feature_invoiceManagement_desc')}>
                             <InvoiceManagementSection />

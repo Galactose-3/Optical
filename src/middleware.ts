@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   const currentUser = request.cookies.get('currentUser')?.value
   const { pathname } = request.nextUrl
 
-  if (pathname.startsWith('/_next') || pathname.startsWith('/api') || pathname.includes('favicon.ico')) {
+  if (pathname.startsWith('/api/') || pathname.startsWith('/_next') || pathname.includes('favicon.ico')) {
     return NextResponse.next();
   }
 
@@ -35,5 +35,5 @@ export function middleware(request: NextRequest) {
 }
  
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 }
