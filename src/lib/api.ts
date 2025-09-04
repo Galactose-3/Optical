@@ -13,7 +13,7 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 // Helper function to fetch data from the API
 async function fetchData<T>(endpoint: string): Promise<T> {
     // In a real app, you would fetch from your domain
-    const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '';
+    const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL || '';
     const res = await fetch(`${baseUrl}/api/${endpoint}`);
     
     if (!res.ok) {
