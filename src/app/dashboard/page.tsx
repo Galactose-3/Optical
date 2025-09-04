@@ -3,45 +3,45 @@
 
 import * as React from 'react';
 import {
-  Activity,
-  DollarSign,
-  Receipt,
-  Users,
-  FileText,
-  BookUser,
-  Star,
-  ClipboardList,
-  LifeBuoy,
-  Zap,
-  Package,
-  Boxes,
-  LineChart,
-  LayoutDashboard,
-  Briefcase,
-  Calendar,
-  PlusCircle,
-  AlertTriangle,
-  Timer,
-  LogOut,
-  Printer,
-  Download,
-  FileSpreadsheet,
-  Loader2,
-  MapPin,
-  HelpCircle,
-  Phone,
-  Book,
-  ExternalLink,
-  Wallet,
-  PackageSearch,
+    Activity,
+    DollarSign,
+    Receipt,
+    Users,
+    FileText,
+    BookUser,
+    Star,
+    ClipboardList,
+    LifeBuoy,
+    Zap,
+    Package,
+    Boxes,
+    LineChart,
+    LayoutDashboard,
+    Briefcase,
+    Calendar,
+    PlusCircle,
+    AlertTriangle,
+    Timer,
+    LogOut,
+    Printer,
+    Download,
+    FileSpreadsheet,
+    Loader2,
+    MapPin,
+    HelpCircle,
+    Phone,
+    Book,
+    ExternalLink,
+    Wallet,
+    PackageSearch,
 } from 'lucide-react';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-  CardFooter,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+    CardFooter,
 } from '@/components/ui/card';
 import {
     Table,
@@ -50,7 +50,7 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-  } from '@/components/ui/table';
+} from '@/components/ui/table';
 import AuditReport from '@/components/audit-report';
 import { Badge } from '@/components/ui/badge';
 import type { Patient, Invoice, Product, OrderSlip, Appointment, AdminPaymentNotice, Shop, Doctor } from '@/lib/types';
@@ -70,6 +70,7 @@ import { PatientDetailsDisplay } from '@/components/patient-details-display';
 import { format, differenceInDays, parseISO, addDays } from 'date-fns';
 import { OrderSlipDisplay } from '@/components/order-slip-display';
 import { AppointmentScheduler } from '@/components/appointment-scheduler';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { CSVLink } from 'react-csv';
@@ -86,16 +87,17 @@ import { InvoiceReport } from '@/components/invoice-report';
 import AdminPaymentManager from '@/components/admin-payment-manager';
 import InventoryStatus from '@/components/inventory-status';
 import StockManagement from '@/components/stock-management';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { getPatients, getProducts, getInvoices, getAppointments, getPurchaseOrders, getShops, getDoctors, getAdminPaymentNotices, getStaff, getAdmins } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/context/language-context';
+import BestSellerByPriceRange from '@/components/best-seller-by-price-range';
 
 // Reusable Stat Card Component
 const StatCard = ({ title, icon: Icon, value, description, isLoading }: { title: string, icon: React.ElementType, value: string, description: string, isLoading?: boolean }) => {
     if (isLoading) {
         return (
-             <Card>
+            <Card>
                 <CardHeader>
                     <div className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <Skeleton className="h-4 w-24" />
@@ -109,7 +111,7 @@ const StatCard = ({ title, icon: Icon, value, description, isLoading }: { title:
             </Card>
         )
     }
-    
+
     return (
         <Card className="hover:bg-accent/50 transition-colors">
             <CardHeader>
@@ -127,14 +129,14 @@ const StatCard = ({ title, icon: Icon, value, description, isLoading }: { title:
 }
 
 function LogoutButton({ fullWidth = false }: { fullWidth?: boolean }) {
-    const navigate = useNavigate();
+    const router = useRouter();
     const { t } = useLanguage();
 
     const handleLogout = () => {
         document.cookie = "currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie = "userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie = "patientId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        navigate('/login');
+        router.push('/login');
     };
 
     return (
@@ -148,402 +150,403 @@ function LogoutButton({ fullWidth = false }: { fullWidth?: boolean }) {
 
 // Section Components
 function AdminDashboard() {
-  const { formatCurrency, registerValue, convertedValues } = useCurrency();
-  const [invoices, setInvoices] = React.useState<Invoice[]>([]);
-  const [patients, setPatients] = React.useState<Patient[]>([]);
-  const [appointments, setAppointments] = React.useState<Appointment[]>([]);
-  const [paymentNotices, setPaymentNotices] = React.useState<AdminPaymentNotice[]>([]);
-  const [staff, setStaff] = React.useState<any[]>([]);
-  const [doctors, setDoctors] = React.useState<any[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+    const { formatCurrency, registerValue, convertedValues } = useCurrency();
+    const [invoices, setInvoices] = React.useState<Invoice[]>([]);
+    const [patients, setPatients] = React.useState<Patient[]>([]);
+    const [appointments, setAppointments] = React.useState<Appointment[]>([]);
+    const [paymentNotices, setPaymentNotices] = React.useState<AdminPaymentNotice[]>([]);
+    const [staff, setStaff] = React.useState<any[]>([]);
+    const [doctors, setDoctors] = React.useState<any[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    async function fetchData() {
-        setIsLoading(true);
-        const [inv, pat, app, notice, st, doc] = await Promise.all([
-            getInvoices(),
-            getPatients(),
-            getAppointments(),
-            getAdminPaymentNotices(),
-            getStaff(),
-            getDoctors(),
-        ]);
-        setInvoices(inv);
-        setPatients(pat);
-        setAppointments(app);
-        setPaymentNotices(notice);
-        setStaff(st);
-        setDoctors(doc);
-        setIsLoading(false);
-    }
-    fetchData();
-  }, []);
-
-  const totalRevenue = invoices.reduce((sum, inv) => inv.status === 'Paid' ? sum + inv.total : sum, 0);
-  const outstandingInvoicesValue = invoices.reduce((sum, inv) => (inv.status === 'Unpaid' || inv.status === 'Overdue') ? sum + inv.total : sum, 0);
-  
-  const totalRevenueId = 'totalRevenue_admin';
-  const outstandingInvoicesId = 'outstandingInvoices_admin';
-  
-  const allStaff = [...staff, ...doctors];
-
-  const [paymentNotice, setPaymentNotice] = React.useState<any>(null);
-  const [lockout, setLockout] = React.useState(false);
-  const [daysLeft, setDaysLeft] = React.useState(0);
-
-  React.useEffect(() => {
-    registerValue(totalRevenueId, totalRevenue);
-    registerValue(outstandingInvoicesId, outstandingInvoicesValue);
-  }, [registerValue, totalRevenue, outstandingInvoicesValue, totalRevenueId, outstandingInvoicesId, invoices]);
-
-  React.useEffect(() => {
-    const adminEmail = getCookie('currentUser');
-    const notice = paymentNotices.find(n => n.adminEmail === adminEmail && n.status === 'pending');
-    
-    if (notice) {
-        setPaymentNotice(notice);
-        const dueDate = parseISO(notice.dueDate);
-        const today = new Date();
-        const remaining = differenceInDays(dueDate, today);
-        setDaysLeft(Math.max(0, remaining));
-
-        if(remaining < 0 && notice.lockOnExpire) {
-            setLockout(true);
+    React.useEffect(() => {
+        async function fetchData() {
+            setIsLoading(true);
+            const [inv, pat, app, notice, st, doc] = await Promise.all([
+                getInvoices(),
+                getPatients(),
+                getAppointments(),
+                getAdminPaymentNotices(),
+                getStaff(),
+                getDoctors(),
+            ]);
+            setInvoices(inv);
+            setPatients(pat);
+            setAppointments(app);
+            setPaymentNotices(notice);
+            setStaff(st);
+            setDoctors(doc);
+            setIsLoading(false);
         }
-    }
-  }, [paymentNotices]);
+        fetchData();
+    }, []);
 
-  const displayTotalRevenue = convertedValues[totalRevenueId] ?? totalRevenue;
-  const displayOutstandingInvoices = convertedValues[outstandingInvoicesId] ?? outstandingInvoicesValue;
-  const paymentNoticeAmount = paymentNotice ? (convertedValues[`admin_payment_${paymentNotice.adminEmail}`] ?? paymentNotice.amountDue) : 0;
-  const paymentNoticeId = paymentNotice ? `admin_payment_${paymentNotice.adminEmail}` : '';
+    const totalRevenue = invoices.reduce((sum, inv) => inv.status === 'Paid' ? sum + inv.total : sum, 0);
+    const outstandingInvoicesValue = invoices.reduce((sum, inv) => (inv.status === 'Unpaid' || inv.status === 'Overdue') ? sum + inv.total : sum, 0);
 
-   React.useEffect(() => {
-    if (paymentNotice) {
-      registerValue(paymentNoticeId, paymentNotice.amountDue);
-    }
-  }, [registerValue, paymentNotice, paymentNoticeId]);
+    const totalRevenueId = 'totalRevenue_admin';
+    const outstandingInvoicesId = 'outstandingInvoices_admin';
+
+    const allStaff = [...staff, ...doctors];
+
+    const [paymentNotice, setPaymentNotice] = React.useState<any>(null);
+    const [lockout, setLockout] = React.useState(false);
+    const [daysLeft, setDaysLeft] = React.useState(0);
+
+    React.useEffect(() => {
+        registerValue(totalRevenueId, totalRevenue);
+        registerValue(outstandingInvoicesId, outstandingInvoicesValue);
+    }, [registerValue, totalRevenue, outstandingInvoicesValue, totalRevenueId, outstandingInvoicesId, invoices]);
+
+    React.useEffect(() => {
+        const adminEmail = getCookie('currentUser');
+        const notice = paymentNotices.find(n => n.adminEmail === adminEmail && n.status === 'pending');
+
+        if (notice) {
+            setPaymentNotice(notice);
+            const dueDate = parseISO(notice.dueDate);
+            const today = new Date();
+            const remaining = differenceInDays(dueDate, today);
+            setDaysLeft(Math.max(0, remaining));
+
+            if (remaining < 0 && notice.lockOnExpire) {
+                setLockout(true);
+            }
+        }
+    }, [paymentNotices]);
+
+    const displayTotalRevenue = convertedValues[totalRevenueId] ?? totalRevenue;
+    const displayOutstandingInvoices = convertedValues[outstandingInvoicesId] ?? outstandingInvoicesValue;
+    const paymentNoticeAmount = paymentNotice ? (convertedValues[`admin_payment_${paymentNotice.adminEmail}`] ?? paymentNotice.amountDue) : 0;
+    const paymentNoticeId = paymentNotice ? `admin_payment_${paymentNotice.adminEmail}` : '';
+
+    React.useEffect(() => {
+        if (paymentNotice) {
+            registerValue(paymentNoticeId, paymentNotice.amountDue);
+        }
+    }, [registerValue, paymentNotice, paymentNoticeId]);
 
 
-  const AdminLockoutScreen = () => (
-    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md border-destructive bg-destructive/10 text-destructive-foreground">
+    const AdminLockoutScreen = () => (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md border-destructive bg-destructive/10 text-destructive-foreground">
+                <CardHeader>
+                    <div className="flex items-center gap-4">
+                        <AlertTriangle className="h-8 w-8 text-destructive" />
+                        <div>
+                            <CardTitle>Portal Access Locked</CardTitle>
+                            <CardDescription className="text-destructive-foreground/80">Your access has been restricted due to an overdue payment.</CardDescription>
+                        </div>
+                    </div>
+                </CardHeader>
+                <CardContent className="text-center space-y-4">
+                    <div className="text-4xl font-bold">{formatCurrency(paymentNoticeAmount)}</div>
+                    <p className="font-semibold">Outstanding Amount Due</p>
+                    <p className="text-sm">
+                        Please contact the business owner to settle the payment and restore access.
+                    </p>
+                </CardContent>
+                <CardFooter className="flex justify-center p-4">
+                    <LogoutButton fullWidth />
+                </CardFooter>
+            </Card>
+        </div>
+    );
+
+    const PaymentWarning = () => (
+        <Card className="border-yellow-500 bg-yellow-500/10 mb-8">
             <CardHeader>
                 <div className="flex items-center gap-4">
-                    <AlertTriangle className="h-8 w-8 text-destructive" />
+                    <Timer className="h-8 w-8 text-yellow-500" />
                     <div>
-                        <CardTitle>Portal Access Locked</CardTitle>
-                        <CardDescription className="text-destructive-foreground/80">Your access has been restricted due to an overdue payment.</CardDescription>
+                        <CardTitle className="text-yellow-200">Payment Due Reminder</CardTitle>
+                        <CardDescription className="text-yellow-200/80">A payment is due on your account.</CardDescription>
                     </div>
                 </div>
             </CardHeader>
-            <CardContent className="text-center space-y-4">
-                 <div className="text-4xl font-bold">{formatCurrency(paymentNoticeAmount)}</div>
-                <p className="font-semibold">Outstanding Amount Due</p>
-                <p className="text-sm">
-                    Please contact the business owner to settle the payment and restore access.
-                </p>
-            </CardContent>
-             <CardFooter className="flex justify-center p-4">
-                <LogoutButton fullWidth />
-            </CardFooter>
-        </Card>
-    </div>
-  );
-
-  const PaymentWarning = () => (
-     <Card className="border-yellow-500 bg-yellow-500/10 mb-8">
-        <CardHeader>
-             <div className="flex items-center gap-4">
-                <Timer className="h-8 w-8 text-yellow-500" />
+            <CardContent className="flex items-center justify-center gap-8 text-center">
                 <div>
-                    <CardTitle className="text-yellow-200">Payment Due Reminder</CardTitle>
-                    <CardDescription className="text-yellow-200/80">A payment is due on your account.</CardDescription>
+                    <div className="text-4xl font-bold text-yellow-400">{formatCurrency(paymentNoticeAmount)}</div>
+                    <p className="font-semibold">Amount Due</p>
                 </div>
-            </div>
-        </CardHeader>
-         <CardContent className="flex items-center justify-center gap-8 text-center">
-            <div>
-                <div className="text-4xl font-bold text-yellow-400">{formatCurrency(paymentNoticeAmount)}</div>
-                <p className="font-semibold">Amount Due</p>
-            </div>
-            <div>
-                 <div className="text-4xl font-bold text-yellow-400">{daysLeft}</div>
-                <p className="font-semibold">Days Remaining</p>
-            </div>
-        </CardContent>
-    </Card>
-  );
-
-  if (lockout) {
-      return <AdminLockoutScreen />;
-  }
-  
-  return (
-    <div className="space-y-8">
-      {paymentNotice && <PaymentWarning />}
-
-      <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-         <StatCard 
-            title="Total Revenue"
-            icon={DollarSign}
-            value={formatCurrency(displayTotalRevenue)}
-            description="+20.1% from last month"
-            isLoading={isLoading}
-          />
-           <StatCard 
-            title="Outstanding Invoices"
-            icon={Receipt}
-            value={formatCurrency(displayOutstandingInvoices)}
-            description={`${invoices.filter(inv => inv.status === 'Overdue').length} invoices currently overdue`}
-            isLoading={isLoading}
-          />
-          <StatCard 
-            title="Active Patients"
-            icon={Users}
-            value={`${patients.length}`}
-            description="Total patients in system"
-            isLoading={isLoading}
-          />
-           <StatCard 
-            title="Upcoming Appointments"
-            icon={Calendar}
-            value={`${appointments.filter(a => new Date(a.date) >= new Date()).length}`}
-            description="Total appointments scheduled"
-            isLoading={isLoading}
-          />
-      </div>
-       <div className="grid gap-8 md:grid-cols-2">
-        <AuditReport />
-        <InvoiceReport />
-      </div>
-       <Card>
-          <CardHeader>
-            <CardTitle>Staff & Doctor Logins</CardTitle>
-            <CardDescription>Recent login activity of all team members.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-                <Skeleton className="h-48 w-full" />
-            ) : (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Last Login</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {allStaff.map(user => (
-                            <TableRow key={user.email}>
-                                <TableCell>{user.name}</TableCell>
-                                <TableCell>{user.email.includes('doctor') ? 'Doctor' : 'Staff'}</TableCell>
-                                <TableCell>{user.lastLogin}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            )}
-          </CardContent>
+                <div>
+                    <div className="text-4xl font-bold text-yellow-400">{daysLeft}</div>
+                    <p className="font-semibold">Days Remaining</p>
+                </div>
+            </CardContent>
         </Card>
-    </div>
-  );
+    );
+
+    if (lockout) {
+        return <AdminLockoutScreen />;
+    }
+
+    return (
+        <div className="space-y-8">
+            {paymentNotice && <PaymentWarning />}
+
+            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+                <StatCard
+                    title="Total Revenue"
+                    icon={DollarSign}
+                    value={formatCurrency(displayTotalRevenue)}
+                    description="+20.1% from last month"
+                    isLoading={isLoading}
+                />
+                <StatCard
+                    title="Outstanding Invoices"
+                    icon={Receipt}
+                    value={formatCurrency(displayOutstandingInvoices)}
+                    description={`${invoices.filter(inv => inv.status === 'Overdue').length} invoices currently overdue`}
+                    isLoading={isLoading}
+                />
+                <StatCard
+                    title="Active Patients"
+                    icon={Users}
+                    value={`${patients.length}`}
+                    description="Total patients in system"
+                    isLoading={isLoading}
+                />
+                <StatCard
+                    title="Upcoming Appointments"
+                    icon={Calendar}
+                    value={`${appointments.filter(a => new Date(a.date) >= new Date()).length}`}
+                    description="Total appointments scheduled"
+                    isLoading={isLoading}
+                />
+            </div>
+            <div className="grid gap-8 md:grid-cols-2">
+                <AuditReport />
+                <InvoiceReport />
+            </div>
+            <BestSellerByPriceRange />
+            <Card>
+                <CardHeader>
+                    <CardTitle>Staff & Doctor Logins</CardTitle>
+                    <CardDescription>Recent login activity of all team members.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {isLoading ? (
+                        <Skeleton className="h-48 w-full" />
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Role</TableHead>
+                                    <TableHead>Last Login</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {allStaff.map(user => (
+                                    <TableRow key={user.email}>
+                                        <TableCell>{user.name}</TableCell>
+                                        <TableCell>{user.email.includes('doctor') ? 'Doctor' : 'Staff'}</TableCell>
+                                        <TableCell>{user.lastLogin}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+    );
 }
 
 function OwnerDashboard() {
-  const { formatCurrency, registerValue, convertedValues } = useCurrency();
-  const [invoices, setInvoices] = React.useState<Invoice[]>([]);
-  const [doctors, setDoctors] = React.useState<Doctor[]>([]);
-  const [admins, setAdmins] = React.useState<any[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
+    const { formatCurrency, registerValue, convertedValues } = useCurrency();
+    const [invoices, setInvoices] = React.useState<Invoice[]>([]);
+    const [doctors, setDoctors] = React.useState<Doctor[]>([]);
+    const [admins, setAdmins] = React.useState<any[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    async function fetchData() {
-        setIsLoading(true);
-        const [inv, doc, adm] = await Promise.all([
-            getInvoices(),
-            getDoctors(),
-            getAdmins(),
-        ]);
-        setInvoices(inv);
-        setDoctors(doc);
-        setAdmins(adm);
-        setIsLoading(false);
-    }
-    fetchData();
-  }, []);
+    React.useEffect(() => {
+        async function fetchData() {
+            setIsLoading(true);
+            const [inv, doc, adm] = await Promise.all([
+                getInvoices(),
+                getDoctors(),
+                getAdmins(),
+            ]);
+            setInvoices(inv);
+            setDoctors(doc);
+            setAdmins(adm);
+            setIsLoading(false);
+        }
+        fetchData();
+    }, []);
 
-  const totalRevenue = invoices.reduce((sum, inv) => inv.status === 'Paid' ? sum + inv.total : sum, 0);
-  const outstandingInvoicesValue = invoices.reduce((sum, inv) => (inv.status === 'Unpaid' || inv.status === 'Overdue') ? sum + inv.total : sum, 0);
-  const totalRevenueId = 'totalRevenue_owner';
-  const outstandingInvoicesId = 'outstandingInvoices_owner';
+    const totalRevenue = invoices.reduce((sum, inv) => inv.status === 'Paid' ? sum + inv.total : sum, 0);
+    const outstandingInvoicesValue = invoices.reduce((sum, inv) => (inv.status === 'Unpaid' || inv.status === 'Overdue') ? sum + inv.total : sum, 0);
+    const totalRevenueId = 'totalRevenue_owner';
+    const outstandingInvoicesId = 'outstandingInvoices_owner';
 
-  React.useEffect(() => {
-    registerValue(totalRevenueId, totalRevenue);
-    registerValue(outstandingInvoicesId, outstandingInvoicesValue);
-  }, [registerValue, totalRevenue, outstandingInvoicesValue, totalRevenueId, outstandingInvoicesId, invoices]);
+    React.useEffect(() => {
+        registerValue(totalRevenueId, totalRevenue);
+        registerValue(outstandingInvoicesId, outstandingInvoicesValue);
+    }, [registerValue, totalRevenue, outstandingInvoicesValue, totalRevenueId, outstandingInvoicesId, invoices]);
 
-  const displayTotalRevenue = convertedValues[totalRevenueId] ?? totalRevenue;
-  const displayOutstandingInvoices = convertedValues[outstandingInvoicesId] ?? outstandingInvoicesValue;
+    const displayTotalRevenue = convertedValues[totalRevenueId] ?? totalRevenue;
+    const displayOutstandingInvoices = convertedValues[outstandingInvoicesId] ?? outstandingInvoicesValue;
 
-  return (
-    <div className="space-y-8">
-       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-        <StatCard 
-          title="Total Revenue"
-          icon={DollarSign}
-          value={formatCurrency(displayTotalRevenue)}
-          description="+20.1% from last month"
-          isLoading={isLoading}
-        />
-        <StatCard 
-          title="Outstanding Invoices"
-          icon={Receipt}
-          value={formatCurrency(displayOutstandingInvoices)}
-          description={`${invoices.filter(inv => inv.status === 'Overdue').length} invoices currently overdue`}
-          isLoading={isLoading}
-        />
-        <StatCard 
-          title="Recent Activity"
-          icon={Activity}
-          value="+573"
-          description="+201 since last hour"
-          isLoading={isLoading}
-        />
-         <StatCard 
-          title="Total Staff"
-          icon={Users}
-          value={`${doctors.length + 1}`}
-          description="Staff & Doctors on payroll"
-          isLoading={isLoading}
-        />
-      </div>
-      <div className="grid gap-8 md:grid-cols-2">
-        <BestSellerCard year={new Date().getFullYear()} />
-        <Card>
-            <CardHeader>
-                <CardTitle>Accounting Integration</CardTitle>
-                <CardDescription>View detailed financial reports and manage accounting in Tally.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <a href="https://tallysolutions.com/" target="_blank" rel="noopener noreferrer">
-                    <Button className="w-full">
-                        <ExternalLink className="mr-2 h-4 w-4" /> Go to Tally
-                    </Button>
-                </a>
-            </CardContent>
-        </Card>
-      </div>
-       <Card>
-          <CardHeader>
-            <CardTitle>Admin Login Details</CardTitle>
-            <CardDescription>Recent login activity of all admin users.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-                <Skeleton className="h-24 w-full" />
-            ) : (
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Role</TableHead>
-                            <TableHead>Last Login</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {admins.map(user => (
-                            <TableRow key={user.email}>
-                                <TableCell>{user.name}</TableCell>
-                                <TableCell>Admin</TableCell>
-                                <TableCell>{user.lastLogin}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            )}
-          </CardContent>
-        </Card>
-      <BrandLogos />
-    </div>
-  )
+    return (
+        <div className="space-y-8">
+            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+                <StatCard
+                    title="Total Revenue"
+                    icon={DollarSign}
+                    value={formatCurrency(displayTotalRevenue)}
+                    description="+20.1% from last month"
+                    isLoading={isLoading}
+                />
+                <StatCard
+                    title="Outstanding Invoices"
+                    icon={Receipt}
+                    value={formatCurrency(displayOutstandingInvoices)}
+                    description={`${invoices.filter(inv => inv.status === 'Overdue').length} invoices currently overdue`}
+                    isLoading={isLoading}
+                />
+                <StatCard
+                    title="Recent Activity"
+                    icon={Activity}
+                    value="+573"
+                    description="+201 since last hour"
+                    isLoading={isLoading}
+                />
+                <StatCard
+                    title="Total Staff"
+                    icon={Users}
+                    value={`${doctors.length + 1}`}
+                    description="Staff & Doctors on payroll"
+                    isLoading={isLoading}
+                />
+            </div>
+            <div className="grid gap-8 md:grid-cols-2">
+                <BestSellerCard year={new Date().getFullYear()} />
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Accounting Integration</CardTitle>
+                        <CardDescription>View detailed financial reports and manage accounting in Tally.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <a href="https://tallysolutions.com/" target="_blank" rel="noopener noreferrer">
+                            <Button className="w-full">
+                                <ExternalLink className="mr-2 h-4 w-4" /> Go to Tally
+                            </Button>
+                        </a>
+                    </CardContent>
+                </Card>
+            </div>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Admin Login Details</CardTitle>
+                    <CardDescription>Recent login activity of all admin users.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {isLoading ? (
+                        <Skeleton className="h-24 w-full" />
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead>Role</TableHead>
+                                    <TableHead>Last Login</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {admins.map(user => (
+                                    <TableRow key={user.email}>
+                                        <TableCell>{user.name}</TableCell>
+                                        <TableCell>Admin</TableCell>
+                                        <TableCell>{user.lastLogin}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
+                </CardContent>
+            </Card>
+            <BrandLogos />
+        </div>
+    )
 }
 
 function StaffDashboard() {
-  const [lastLogin, setLastLogin] = React.useState<string | null>(null);
-  const { formatCurrency, registerValue, convertedValues } = useCurrency();
-  const [recentInvoices, setRecentInvoices] = React.useState<Invoice[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  
-  React.useEffect(() => {
-    async function fetchData() {
-        setIsLoading(true);
-        const inv = await getInvoices();
-        setRecentInvoices(inv.slice(0,5));
-        setIsLoading(false);
-    }
-    fetchData();
-    // This should only run on the client to avoid hydration mismatch
-    setLastLogin(new Date().toLocaleString());
-  }, []);
+    const [lastLogin, setLastLogin] = React.useState<string | null>(null);
+    const { formatCurrency, registerValue, convertedValues } = useCurrency();
+    const [recentInvoices, setRecentInvoices] = React.useState<Invoice[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
 
-  React.useEffect(() => {
-    recentInvoices.forEach(invoice => {
-        registerValue(`staff_invoice_${invoice.id}`, invoice.total);
-    });
-  }, [registerValue, recentInvoices]);
+    React.useEffect(() => {
+        async function fetchData() {
+            setIsLoading(true);
+            const inv = await getInvoices();
+            setRecentInvoices(inv.slice(0, 5));
+            setIsLoading(false);
+        }
+        fetchData();
+        // This should only run on the client to avoid hydration mismatch
+        setLastLogin(new Date().toLocaleString());
+    }, []);
 
-  return (
-    <div className="space-y-8">
-        <Card>
-            <CardHeader>
-                <CardTitle>Your Login Details</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <div className="flex justify-between items-center p-3 rounded-lg border bg-secondary/30">
-                    <p className="font-medium">Last Login</p>
-                    <p className="font-semibold">{lastLogin || 'Loading...'}</p>
-                </div>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader>
-                <CardTitle>Recent Invoices</CardTitle>
-                <CardDescription>A quick look at the most recent invoices created.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                 {isLoading ? (
-                    <Skeleton className="h-48 w-full" />
-                ) : (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>ID</TableHead>
-                                <TableHead>Patient</TableHead>
-                                <TableHead>Due Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Total</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {recentInvoices.map(invoice => (
-                                <TableRow key={invoice.id}>
-                                    <TableCell className="font-mono">{invoice.id}</TableCell>
-                                    <TableCell>{invoice.patientName}</TableCell>
-                                    <TableCell>{invoice.dueDate}</TableCell>
-                                    <TableCell><Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Overdue' ? 'destructive' : 'secondary'}>{invoice.status}</Badge></TableCell>
-                                    <TableCell className="text-right">{formatCurrency(convertedValues[`staff_invoice_${invoice.id}`] ?? invoice.total)}</TableCell>
+    React.useEffect(() => {
+        recentInvoices.forEach(invoice => {
+            registerValue(`staff_invoice_${invoice.id}`, invoice.total);
+        });
+    }, [registerValue, recentInvoices]);
+
+    return (
+        <div className="space-y-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Your Login Details</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="flex justify-between items-center p-3 rounded-lg border bg-secondary/30">
+                        <p className="font-medium">Last Login</p>
+                        <p className="font-semibold">{lastLogin || 'Loading...'}</p>
+                    </div>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Recent Invoices</CardTitle>
+                    <CardDescription>A quick look at the most recent invoices created.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {isLoading ? (
+                        <Skeleton className="h-48 w-full" />
+                    ) : (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>ID</TableHead>
+                                    <TableHead>Patient</TableHead>
+                                    <TableHead>Due Date</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Total</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
-            </CardContent>
-        </Card>
-        <BrandLogos />
-    </div>
-  )
+                            </TableHeader>
+                            <TableBody>
+                                {recentInvoices.map(invoice => (
+                                    <TableRow key={invoice.id}>
+                                        <TableCell className="font-mono">{invoice.id}</TableCell>
+                                        <TableCell>{invoice.patientName}</TableCell>
+                                        <TableCell>{invoice.dueDate}</TableCell>
+                                        <TableCell><Badge variant={invoice.status === 'Paid' ? 'default' : invoice.status === 'Overdue' ? 'destructive' : 'secondary'}>{invoice.status}</Badge></TableCell>
+                                        <TableCell className="text-right">{formatCurrency(convertedValues[`staff_invoice_${invoice.id}`] ?? invoice.total)}</TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    )}
+                </CardContent>
+            </Card>
+            <BrandLogos />
+        </div>
+    )
 }
 
 function DoctorDashboard() {
@@ -561,11 +564,11 @@ function DoctorDashboard() {
         fetchData();
     }, []);
 
-     const handleAddPatient = (newPatientData: Omit<Patient, 'id' | 'lastVisit' | 'address' | 'shopId'> & { address?: { city: string, state: string }}) => {
+    const handleAddPatient = (newPatientData: Omit<Patient, 'id' | 'lastVisit' | 'address' | 'shopId'> & { address?: { city: string, state: string } }) => {
         const newPatient: Patient = {
             id: `PAT-${Date.now()}`,
             lastVisit: new Date().toISOString().split('T')[0],
-            address: newPatientData.address || { city: 'Unknown', state: ''},
+            address: newPatientData.address || { city: 'Unknown', state: '' },
             shopId: 'SHOP001', // default for new patients
             ...newPatientData
         }
@@ -575,18 +578,18 @@ function DoctorDashboard() {
 
     return (
         <div className="space-y-8">
-             <Card>
+            <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                         <CardTitle>Welcome, Doctor</CardTitle>
                         <CardDescription>Here's an overview of your patients.</CardDescription>
                     </div>
-                     <Dialog open={isAddPatientOpen} onOpenChange={setAddPatientOpen}>
+                    <Dialog open={isAddPatientOpen} onOpenChange={setAddPatientOpen}>
                         <DialogTrigger asChild>
                             <Button><PlusCircle className="mr-2 h-4 w-4" /> Add Patient</Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-3xl">
-                             <DialogHeader>
+                            <DialogHeader>
                                 <DialogTitle>Add New Patient</DialogTitle>
                                 <DialogDescription>
                                     Fill in the details below or scan a prescription to get started.
@@ -597,25 +600,25 @@ function DoctorDashboard() {
                     </Dialog>
                 </CardHeader>
                 <CardContent>
-                     {isLoading ? (
+                    {isLoading ? (
                         <Skeleton className="h-48 w-full" />
                     ) : (
                         <Table>
                             <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead className="hidden md:table-cell">Phone</TableHead>
-                                <TableHead className="hidden sm:table-cell">Last Visit</TableHead>
-                            </TableRow>
+                                <TableRow>
+                                    <TableHead>Name</TableHead>
+                                    <TableHead className="hidden md:table-cell">Phone</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Last Visit</TableHead>
+                                </TableRow>
                             </TableHeader>
                             <TableBody>
-                            {patients.slice(0,5).map((patient) => (
-                                <TableRow key={patient.id}>
-                                    <TableCell className="font-medium">{patient.name}</TableCell>
-                                    <TableCell className="hidden md:table-cell">{patient.phone}</TableCell>
-                                    <TableCell className="hidden sm:table-cell">{patient.lastVisit}</TableCell>
-                                </TableRow>
-                            ))}
+                                {patients.slice(0, 5).map((patient) => (
+                                    <TableRow key={patient.id}>
+                                        <TableCell className="font-medium">{patient.name}</TableCell>
+                                        <TableCell className="hidden md:table-cell">{patient.phone}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">{patient.lastVisit}</TableCell>
+                                    </TableRow>
+                                ))}
                             </TableBody>
                         </Table>
                     )}
@@ -641,18 +644,18 @@ function PatientDashboard() {
             if (patientId) {
                 const [allPatients, allInvoices] = await Promise.all([getPatients(), getInvoices()]);
                 const currentPatient = allPatients.find(p => p.id === patientId);
-                
-                if(currentPatient) {
+
+                if (currentPatient) {
                     setPatient(currentPatient);
                     const patientInvoices = allInvoices.filter(inv => inv.patientId === currentPatient.id);
                     const overdue = patientInvoices.filter(inv => inv.status === 'Overdue');
                     setOverdueInvoices(overdue);
-                    
+
                     if (overdue.length > 0) {
-                        const oldestDueDate = overdue.map(inv => parseISO(inv.dueDate)).sort((a,b) => a.getTime() - b.getTime())[0];
+                        const oldestDueDate = overdue.map(inv => parseISO(inv.dueDate)).sort((a, b) => a.getTime() - b.getTime())[0];
                         const lockoutDate = addDays(oldestDueDate, gracePeriod);
                         const today = new Date();
-                        
+
                         const remainingDays = differenceInDays(lockoutDate, today);
                         setDaysLeft(Math.max(0, remainingDays));
 
@@ -671,7 +674,7 @@ function PatientDashboard() {
     const overdueId = 'patient_overdue_total';
 
     React.useEffect(() => {
-        if(overdueInvoices.length > 0) {
+        if (overdueInvoices.length > 0) {
             registerValue(overdueId, totalOverdueAmount)
         }
     }, [registerValue, overdueInvoices, totalOverdueAmount]);
@@ -690,14 +693,14 @@ function PatientDashboard() {
                 </div>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-                 <div className="text-4xl font-bold">{formatCurrency(displayOverdueAmount)}</div>
+                <div className="text-4xl font-bold">{formatCurrency(displayOverdueAmount)}</div>
                 <p className="font-semibold">Total Amount Due</p>
                 <p className="text-sm">
                     Please contact our office at <span className="font-bold">555-123-4567</span> or visit us to clear your outstanding balance and restore full access to your account.
                 </p>
             </CardContent>
             <CardFooter className="flex justify-center p-4">
-                 <LogoutButton fullWidth />
+                <LogoutButton fullWidth />
             </CardFooter>
         </Card>
     );
@@ -705,7 +708,7 @@ function PatientDashboard() {
     const CountdownWarning = () => (
         <Card className="border-yellow-500 bg-yellow-500/10 mb-8">
             <CardHeader>
-                 <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4">
                     <Timer className="h-8 w-8 text-yellow-500" />
                     <div>
                         <CardTitle className="text-yellow-200">Payment Reminder</CardTitle>
@@ -713,19 +716,19 @@ function PatientDashboard() {
                     </div>
                 </div>
             </CardHeader>
-             <CardContent className="flex items-center justify-center gap-8 text-center">
+            <CardContent className="flex items-center justify-center gap-8 text-center">
                 <div>
                     <div className="text-4xl font-bold text-yellow-400">{formatCurrency(displayOverdueAmount)}</div>
                     <p className="font-semibold">Total Amount Due</p>
                 </div>
                 <div>
-                     <div className="text-4xl font-bold text-yellow-400">{daysLeft}</div>
+                    <div className="text-4xl font-bold text-yellow-400">{daysLeft}</div>
                     <p className="font-semibold">Days to Settle</p>
                 </div>
             </CardContent>
         </Card>
     );
-    
+
     if (lockout) {
         return (
             <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -735,10 +738,10 @@ function PatientDashboard() {
             </div>
         )
     }
-    
+
     if (isLoading) {
         return (
-             <Card>
+            <Card>
                 <CardContent className="p-6">
                     <Skeleton className="h-48 w-full" />
                 </CardContent>
@@ -780,18 +783,18 @@ function InvoiceManagementSection() {
             registerValue(`inv_manage_${invoice.id}`, invoice.total);
         });
     }, [registerValue, invoices]);
-    
+
     if (selectedInvoice) {
         return (
             <div>
-                 <Button onClick={() => setSelectedInvoice(null)} variant="outline" className="mb-4">
+                <Button onClick={() => setSelectedInvoice(null)} variant="outline" className="mb-4">
                     &larr; Back to Invoices
-                 </Button>
-                 <InvoiceDisplay invoice={selectedInvoice} />
+                </Button>
+                <InvoiceDisplay invoice={selectedInvoice} />
             </div>
         )
     }
-    
+
     return (
         <Card>
             <CardHeader>
@@ -834,7 +837,7 @@ function InvoiceManagementSection() {
     );
 }
 
-const FeatureCard = ({ title, description, children, isLoading } : { title: string, description: string, children: React.ReactNode, isLoading?: boolean }) => (
+const FeatureCard = ({ title, description, children, isLoading }: { title: string, description: string, children: React.ReactNode, isLoading?: boolean }) => (
     <Card>
         <CardHeader>
             <CardTitle>{title}</CardTitle>
@@ -852,7 +855,7 @@ function PatientManagement() {
     const [viewingPatient, setViewingPatient] = React.useState<Patient | null>(null);
     const [isLoading, setIsLoading] = React.useState(true);
 
-     React.useEffect(() => {
+    React.useEffect(() => {
         async function fetchData() {
             setIsLoading(true);
             const data = await getPatients();
@@ -862,11 +865,11 @@ function PatientManagement() {
         fetchData();
     }, []);
 
-    const handleAddPatient = (newPatientData: Omit<Patient, 'id' | 'lastVisit' | 'address' | 'shopId'> & { address?: { city: string, state: string }}) => {
+    const handleAddPatient = (newPatientData: Omit<Patient, 'id' | 'lastVisit' | 'address' | 'shopId'> & { address?: { city: string, state: string } }) => {
         const newPatient: Patient = {
             id: `PAT-${Date.now()}`,
             lastVisit: new Date().toISOString().split('T')[0],
-            address: newPatientData.address || { city: 'Unknown', state: ''},
+            address: newPatientData.address || { city: 'Unknown', state: '' },
             shopId: 'SHOP001', // default for new patients
             ...newPatientData
         }
@@ -876,7 +879,7 @@ function PatientManagement() {
 
     return (
         <Card>
-             <CardHeader className="flex flex-row items-center justify-between">
+            <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                     <CardTitle>All Patients</CardTitle>
                     <CardDescription>A list of all patients in the system.</CardDescription>
@@ -886,7 +889,7 @@ function PatientManagement() {
                         <Button><PlusCircle className="mr-2 h-4 w-4" /> Add Patient</Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-3xl">
-                         <DialogHeader>
+                        <DialogHeader>
                             <DialogTitle>Add New Patient</DialogTitle>
                             <DialogDescription>
                                 Fill in the details below or scan a prescription to get started.
@@ -929,9 +932,9 @@ function PatientManagement() {
                 )}
             </CardContent>
 
-             <Dialog open={!!viewingPatient} onOpenChange={(isOpen) => !isOpen && setViewingPatient(null)}>
+            <Dialog open={!!viewingPatient} onOpenChange={(isOpen) => !isOpen && setViewingPatient(null)}>
                 <DialogContent className="sm:max-w-4xl">
-                     <DialogHeader>
+                    <DialogHeader>
                         <DialogTitle>Patient Details: {viewingPatient?.name}</DialogTitle>
                         <DialogDescription>
                             A complete overview of the patient's record.
@@ -959,19 +962,19 @@ function OrderSlipManagementSection() {
         }
         fetchData();
     }, []);
-    
+
     const handleCreateOrderSlip = (orderSlipData: OrderSlip) => {
         setOrderSlips(prev => [orderSlipData, ...prev]);
         setSelectedOrderSlip(orderSlipData);
     };
 
-     if (selectedOrderSlip) {
+    if (selectedOrderSlip) {
         return (
             <div>
-                 <Button onClick={() => setSelectedOrderSlip(null)} variant="outline" className="mb-4">
+                <Button onClick={() => setSelectedOrderSlip(null)} variant="outline" className="mb-4">
                     &larr; Back to Order Slip Form
-                 </Button>
-                 <OrderSlipDisplay orderSlip={selectedOrderSlip} />
+                </Button>
+                <OrderSlipDisplay orderSlip={selectedOrderSlip} />
             </div>
         )
     }
@@ -990,7 +993,7 @@ function ReportsSection() {
     const [isPrinting, setIsPrinting] = React.useState(false);
     const [csvData, setCsvData] = React.useState<any[]>([]);
     const [csvHeaders, setCsvHeaders] = React.useState<any[]>([]);
-    const csvLinkRef = React.useRef<any>(null);
+    const csvLinkRef = React.useRef<{ link: HTMLAnchorElement }>(null);
     const [activeTab, setActiveTab] = React.useState('sales');
 
     const handlePrint = () => {
@@ -1028,11 +1031,11 @@ function ReportsSection() {
             setIsPrinting(false);
         }
     };
-    
+
     const prepareCsvData = async (reportType: string) => {
         let data: any[] = [];
         let headers: any[] = [];
-        
+
         const initialInvoices = await getInvoices();
         const initialProducts = await getProducts();
         const purchaseOrders = await getPurchaseOrders();
@@ -1076,8 +1079,8 @@ function ReportsSection() {
                 { label: 'Quantity Purchased', key: 'quantity' },
                 { label: 'Total Cost', key: 'totalValue' },
             ];
-             const purchaseMap = new Map();
-             purchaseOrders.forEach(po => {
+            const purchaseMap = new Map();
+            purchaseOrders.forEach(po => {
                 po.items.forEach(item => {
                     const existing = purchaseMap.get(item.productId);
                     if (existing) {
@@ -1095,7 +1098,7 @@ function ReportsSection() {
             });
             data = Array.from(purchaseMap.values());
         } else if (reportType === 'stock') {
-             headers = [
+            headers = [
                 { label: 'Product Name', key: 'name' },
                 { label: 'Brand', key: 'brand' },
                 { label: 'Type', key: 'type' },
@@ -1108,11 +1111,11 @@ function ReportsSection() {
                 stockValue: p.stock * p.price
             }));
         } else if (reportType === 'locations') {
-             headers = [
+            headers = [
                 { label: 'City', key: 'city' },
                 { label: 'Client Count', key: 'clientCount' },
             ];
-             const counts = initialPatients.reduce((acc, patient) => {
+            const counts = initialPatients.reduce((acc, patient) => {
                 const city = patient.address.city;
                 acc[city] = (acc[city] || 0) + 1;
                 return acc;
@@ -1122,7 +1125,7 @@ function ReportsSection() {
                 clientCount: count,
             }));
         }
-        
+
         setCsvHeaders(headers);
         setCsvData(data);
     };
@@ -1130,7 +1133,7 @@ function ReportsSection() {
     const handleExportCsv = () => {
         prepareCsvData(activeTab).then(() => {
             setTimeout(() => {
-                csvLinkRef.current?.click();
+                csvLinkRef.current?.link.click();
                 toast({ title: 'CSV Exported', description: 'The report data has been downloaded.' });
             }, 100);
         });
@@ -1138,50 +1141,50 @@ function ReportsSection() {
 
     return (
         <Card id="report-content">
-             <Tabs defaultValue="sales" onValueChange={setActiveTab}>
+            <Tabs defaultValue="sales" onValueChange={setActiveTab}>
                 <CardHeader className="flex flex-row items-start justify-between">
                     <div>
                         <CardTitle>Detailed Reports</CardTitle>
                         <CardDescription>
-                         In-depth analysis of overall sales, stock, and client data.
+                            In-depth analysis of overall sales, stock, and client data.
                         </CardDescription>
-                         <TabsList className="mt-4">
+                        <TabsList className="mt-4">
                             <TabsTrigger value="sales">Products Sold</TabsTrigger>
                             <TabsTrigger value="purchases">Products Purchased</TabsTrigger>
                             <TabsTrigger value="stock">Products in Stock</TabsTrigger>
                             <TabsTrigger value="locations">Locations</TabsTrigger>
                         </TabsList>
                     </div>
-                     <div className="flex items-center gap-2 print-hidden">
+                    <div className="flex items-center gap-2 print-hidden">
                         <Button variant="outline" size="sm" onClick={handlePrint}>
                             <Printer className="h-4 w-4 mr-2" /> Print
                         </Button>
                         <Button variant="outline" size="sm" onClick={handleDownloadPdf} disabled={isPrinting}>
                             {isPrinting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
-                             PDF
+                            PDF
                         </Button>
                         <Button variant="outline" size="sm" onClick={handleExportCsv}>
                             <FileSpreadsheet className="h-4 w-4 mr-2" /> CSV
                         </Button>
-                        <CSVLink 
+                        <CSVLink
                             data={csvData}
                             headers={csvHeaders}
                             filename={`${activeTab}_report.csv`}
                             className="hidden"
                             ref={csvLinkRef}
                             target="_blank"
-                         />
+                        />
                     </div>
                 </CardHeader>
                 <CardContent>
                     <TabsContent value="sales">
-                      <AuditReport detailed={true} />
+                        <AuditReport detailed={true} />
                     </TabsContent>
                     <TabsContent value="purchases">
                         <AuditReport detailed={true} />
                     </TabsContent>
                     <TabsContent value="stock">
-                       <AuditReport detailed={true} />
+                        <AuditReport detailed={true} />
                     </TabsContent>
                     <TabsContent value="locations">
                         <LocationReport />
@@ -1193,319 +1196,319 @@ function ReportsSection() {
 }
 
 export default function UnifiedDashboard() {
-  const [userRole, setUserRole] = React.useState<string | undefined>(undefined);
-  const [patient, setPatient] = React.useState<Patient | null>(null);
-  const [products, setProducts] = React.useState<Product[]>([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const { t } = useLanguage();
+    const [userRole, setUserRole] = React.useState<string | undefined>(undefined);
+    const [patient, setPatient] = React.useState<Patient | null>(null);
+    const [products, setProducts] = React.useState<Product[]>([]);
+    const [isLoading, setIsLoading] = React.useState(true);
+    const { t } = useLanguage();
 
-  React.useEffect(() => {
-    const role = getCookie('userRole');
-    setUserRole(role);
+    React.useEffect(() => {
+        const role = getCookie('userRole');
+        setUserRole(role);
 
-    async function fetchData() {
-        setIsLoading(true);
-        if (role === 'patient') {
-            const patientId = getCookie('patientId');
-            if (patientId) {
-                const allPatients = await getPatients();
-                setPatient(allPatients.find(p => p.id === patientId) || null);
+        async function fetchData() {
+            setIsLoading(true);
+            if (role === 'patient') {
+                const patientId = getCookie('patientId');
+                if (patientId) {
+                    const allPatients = await getPatients();
+                    setPatient(allPatients.find(p => p.id === patientId) || null);
+                }
             }
+            if (role === 'staff' || role === 'owner') {
+                const prods = await getProducts();
+                setProducts(prods);
+            }
+            setIsLoading(false);
         }
-        if (role === 'staff' || role === 'owner') {
-             const prods = await getProducts();
-             setProducts(prods);
+        fetchData();
+
+    }, []);
+
+    const renderDashboard = () => {
+        switch (userRole) {
+            case 'admin':
+                return <AdminDashboard />;
+            case 'owner':
+                return <OwnerDashboard />;
+            case 'staff':
+                return <StaffDashboard />;
+            case 'doctor':
+                return <DoctorDashboard />;
+            case 'patient':
+                return <PatientDashboard />
+            default:
+                return <div className="text-center p-8">{t('loadingDashboard')}</div>;
         }
-        setIsLoading(false);
     }
-    fetchData();
 
-  }, []);
-
-  const renderDashboard = () => {
-    switch (userRole) {
-      case 'admin':
-        return <AdminDashboard />;
-      case 'owner':
-        return <OwnerDashboard />;
-      case 'staff':
-        return <StaffDashboard />;
-      case 'doctor':
-        return <DoctorDashboard />;
-      case 'patient':
-          return <PatientDashboard />
-      default:
-        return <div className="text-center p-8">{t('loadingDashboard')}</div>;
+    const getGreeting = () => {
+        if (!userRole) return "Welcome";
+        return `Welcome, ${userRole.charAt(0).toUpperCase() + userRole.slice(1)}`;
     }
-  }
-  
-  const getGreeting = () => {
-      if (!userRole) return "Welcome";
-      return `Welcome, ${userRole.charAt(0).toUpperCase() + userRole.slice(1)}`;
-  }
 
-  return (
-    <div className="flex w-full flex-col gap-8">
-        <div>
-             <h1 className="text-5xl font-bold" style={{fontFamily: 'serif'}}>{t('dashboard_title')}</h1>
-            <p className="text-muted-foreground mt-2">{t('dashboard_subtitle')} <span className="font-semibold text-primary">{userRole ? t(`role_${userRole}`) : ''}</span> {t('dashboard_role')}.</p>
-        </div>
+    return (
+        <div className="flex w-full flex-col gap-8">
+            <div>
+                <h1 className="text-5xl font-bold" style={{ fontFamily: 'serif' }}>{t('dashboard_title')}</h1>
+                <p className="text-muted-foreground mt-2">{t('dashboard_subtitle')} <span className="font-semibold text-primary">{userRole ? t(`role_${userRole}`) : ''}</span> {t('dashboard_role')}.</p>
+            </div>
 
-        <Tabs defaultValue="dashboard" className="w-full">
-            <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 h-auto">
-                <TabsTrigger value="dashboard"><LayoutDashboard className="w-4 h-4 mr-2" />{t('tab_dashboard')}</TabsTrigger>
+            <Tabs defaultValue="dashboard" className="w-full">
+                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 h-auto">
+                    <TabsTrigger value="dashboard"><LayoutDashboard className="w-4 h-4 mr-2" />{t('tab_dashboard')}</TabsTrigger>
 
-                {userRole === 'admin' && (
-                    <>
-                        <TabsTrigger value="invoices"><Receipt className="w-4 h-4 mr-2" />{t('tab_invoices')}</TabsTrigger>
-                        <TabsTrigger value="reports"><LineChart className="w-4 h-4 mr-2" />{t('tab_reports')}</TabsTrigger>
-                        <TabsTrigger value="products"><Package className="w-4 h-4 mr-2" />{t('tab_products')}</TabsTrigger>
-                    </>
-                )}
+                    {userRole === 'admin' && (
+                        <>
+                            <TabsTrigger value="invoices"><Receipt className="w-4 h-4 mr-2" />{t('tab_invoices')}</TabsTrigger>
+                            <TabsTrigger value="reports"><LineChart className="w-4 h-4 mr-2" />{t('tab_reports')}</TabsTrigger>
+                            <TabsTrigger value="products"><Package className="w-4 h-4 mr-2" />{t('tab_products')}</TabsTrigger>
+                        </>
+                    )}
 
-                 {userRole === 'staff' && (
-                     <>
-                        <TabsTrigger value="patients"><Users className="w-4 h-4 mr-2" />{t('tab_patients')}</TabsTrigger>
-                        <TabsTrigger value="appointments"><BookUser className="w-4 h-4 mr-2" />{t('tab_appointments')}</TabsTrigger>
-                        <TabsTrigger value="orders"><ClipboardList className="w-4 h-4 mr-2" />{t('tab_orderSlips')}</TabsTrigger>
-                        <TabsTrigger value="loyalty"><Star className="w-4 h-4 mr-2" />{t('tab_loyalty')}</TabsTrigger>
-                        <TabsTrigger value="inventoryStatus"><PackageSearch className="w-4 h-4 mr-2" />{t('tab_inventoryStatus')}</TabsTrigger>
-                        <TabsTrigger value="stockManagement"><Boxes className="w-4 h-4 mr-2" />{t('tab_stockManagement')}</TabsTrigger>
-                        <TabsTrigger value="support"><LifeBuoy className="w-4 h-4 mr-2" />{t('tab_support')}</TabsTrigger>
-                     </>
-                 )}
+                    {userRole === 'staff' && (
+                        <>
+                            <TabsTrigger value="patients"><Users className="w-4 h-4 mr-2" />{t('tab_patients')}</TabsTrigger>
+                            <TabsTrigger value="appointments"><BookUser className="w-4 h-4 mr-2" />{t('tab_appointments')}</TabsTrigger>
+                            <TabsTrigger value="orders"><ClipboardList className="w-4 h-4 mr-2" />{t('tab_orderSlips')}</TabsTrigger>
+                            <TabsTrigger value="loyalty"><Star className="w-4 h-4 mr-2" />{t('tab_loyalty')}</TabsTrigger>
+                            <TabsTrigger value="inventoryStatus"><PackageSearch className="w-4 h-4 mr-2" />{t('tab_inventoryStatus')}</TabsTrigger>
+                            <TabsTrigger value="stockManagement"><Boxes className="w-4 h-4 mr-2" />{t('tab_stockManagement')}</TabsTrigger>
+                            <TabsTrigger value="support"><LifeBuoy className="w-4 h-4 mr-2" />{t('tab_support')}</TabsTrigger>
+                        </>
+                    )}
 
-                 {userRole === 'owner' && (
-                    <>
-                        <TabsTrigger value="patients"><Users className="w-4 h-4 mr-2" />{t('tab_patients')}</TabsTrigger>
-                        <TabsTrigger value="appointments"><BookUser className="w-4 h-4 mr-2" />{t('tab_appointments')}</TabsTrigger>
-                        <TabsTrigger value="invoices"><Receipt className="w-4 h-4 mr-2" />{t('tab_invoices')}</TabsTrigger>
-                        <TabsTrigger value="orders"><ClipboardList className="w-4 h-4 mr-2" />{t('tab_orderSlips')}</TabsTrigger>
-                        <TabsTrigger value="loyalty"><Star className="w-4 h-4 mr-2" />{t('tab_loyalty')}</TabsTrigger>
-                        <TabsTrigger value="products"><Package className="w-4 h-4 mr-2" />{t('tab_products')}</TabsTrigger>
-                        <TabsTrigger value="reports"><LineChart className="w-4 h-4 mr-2" />{t('tab_reports')}</TabsTrigger>
-                        <TabsTrigger value="inventory"><Boxes className="w-4 h-4 mr-2" />{t('tab_inventory')}</TabsTrigger>
-                        <TabsTrigger value="correspondence"><Zap className="w-4 h-4 mr-2" />{t('tab_aiAssistant')}</TabsTrigger>
-                        <TabsTrigger value="schedules"><Calendar className="w-4 h-4 mr-2" />{t('tab_schedules')}</TabsTrigger>
-                        <TabsTrigger value="payments"><Wallet className="w-4 h-4 mr-2" />{t('tab_payments')}</TabsTrigger>
-                    </>
-                )}
+                    {userRole === 'owner' && (
+                        <>
+                            <TabsTrigger value="patients"><Users className="w-4 h-4 mr-2" />{t('tab_patients')}</TabsTrigger>
+                            <TabsTrigger value="appointments"><BookUser className="w-4 h-4 mr-2" />{t('tab_appointments')}</TabsTrigger>
+                            <TabsTrigger value="invoices"><Receipt className="w-4 h-4 mr-2" />{t('tab_invoices')}</TabsTrigger>
+                            <TabsTrigger value="orders"><ClipboardList className="w-4 h-4 mr-2" />{t('tab_orderSlips')}</TabsTrigger>
+                            <TabsTrigger value="loyalty"><Star className="w-4 h-4 mr-2" />{t('tab_loyalty')}</TabsTrigger>
+                            <TabsTrigger value="products"><Package className="w-4 h-4 mr-2" />{t('tab_products')}</TabsTrigger>
+                            <TabsTrigger value="reports"><LineChart className="w-4 h-4 mr-2" />{t('tab_reports')}</TabsTrigger>
+                            <TabsTrigger value="inventory"><Boxes className="w-4 h-4 mr-2" />{t('tab_inventory')}</TabsTrigger>
+                            <TabsTrigger value="correspondence"><Zap className="w-4 h-4 mr-2" />{t('tab_aiAssistant')}</TabsTrigger>
+                            <TabsTrigger value="schedules"><Calendar className="w-4 h-4 mr-2" />{t('tab_schedules')}</TabsTrigger>
+                            <TabsTrigger value="payments"><Wallet className="w-4 h-4 mr-2" />{t('tab_payments')}</TabsTrigger>
+                        </>
+                    )}
 
-                {userRole === 'doctor' && (
-                    <>
+                    {userRole === 'doctor' && (
+                        <>
+                            <TabsTrigger value="prescriptions"><FileText className="w-4 h-4 mr-2" />{t('tab_prescriptions')}</TabsTrigger>
+                        </>
+                    )}
+
+                    {userRole === 'patient' && (
                         <TabsTrigger value="prescriptions"><FileText className="w-4 h-4 mr-2" />{t('tab_prescriptions')}</TabsTrigger>
+                    )}
+
+
+                </TabsList>
+
+                <TabsContent value="dashboard">
+                    <FeatureCard title={t('feature_dashboard_title')} description={t('feature_dashboard_desc')}>
+                        {renderDashboard()}
+                    </FeatureCard>
+                </TabsContent>
+
+                {(userRole === 'owner' || userRole === 'staff' || userRole === 'doctor') && (
+                    <TabsContent value="patients">
+                        <FeatureCard title={t('feature_patientManagement_title')} description={t('feature_patientManagement_desc')}>
+                            <PatientManagement />
+                        </FeatureCard>
+                    </TabsContent>
+                )}
+
+                {(userRole === 'owner' || userRole === 'admin') && (
+                    <TabsContent value="invoices">
+                        <FeatureCard title={t('feature_invoiceManagement_title')} description={t('feature_invoiceManagement_desc')}>
+                            <InvoiceManagementSection />
+                        </FeatureCard>
+                    </TabsContent>
+                )}
+
+
+                {(userRole === 'owner' || userRole === 'staff') && (
+                    <>
+                        <TabsContent value="appointments">
+                            <FeatureCard title={t('feature_appointmentBooking_title')} description={t('feature_appointmentBooking_desc')}>
+                                <AppointmentScheduler />
+                            </FeatureCard>
+                        </TabsContent>
+                        <TabsContent value="orders">
+                            <FeatureCard title={t('feature_createOrderSlip_title')} description={t('feature_createOrderSlip_desc')}>
+                                <OrderSlipManagementSection />
+                            </FeatureCard>
+                        </TabsContent>
+                        <TabsContent value="loyalty">
+                            <FeatureCard title={t('feature_loyaltyProgram_title')} description={t('feature_loyaltyProgram_desc')}>
+                                <LoyaltyManagement />
+                            </FeatureCard>
+                        </TabsContent>
                     </>
-                 )}
+                )}
 
-                 {userRole === 'patient' && (
-                     <TabsTrigger value="prescriptions"><FileText className="w-4 h-4 mr-2" />{t('tab_prescriptions')}</TabsTrigger>
-                 )}
-
-
-            </TabsList>
-            
-            <TabsContent value="dashboard">
-                <FeatureCard title={t('feature_dashboard_title')} description={t('feature_dashboard_desc')}>
-                    {renderDashboard()}
-                </FeatureCard>
-            </TabsContent>
-            
-            {(userRole === 'owner' || userRole === 'staff' || userRole === 'doctor') && (
-                <TabsContent value="patients">
-                    <FeatureCard title={t('feature_patientManagement_title')} description={t('feature_patientManagement_desc')}>
-                        <PatientManagement />
-                    </FeatureCard>
-                </TabsContent>
-            )}
-
-            {(userRole === 'owner' || userRole === 'admin') && (
-                <TabsContent value="invoices">
-                    <FeatureCard title={t('feature_invoiceManagement_title')} description={t('feature_invoiceManagement_desc')}>
-                        <InvoiceManagementSection />
-                    </FeatureCard>
-                </TabsContent>
-             )}
-
-
-            {(userRole === 'owner' || userRole === 'staff') && (
-                <>
-                    <TabsContent value="appointments">
-                        <FeatureCard title={t('feature_appointmentBooking_title')} description={t('feature_appointmentBooking_desc')}>
-                            <AppointmentScheduler />
-                        </FeatureCard>
-                    </TabsContent>
-                    <TabsContent value="orders">
-                         <FeatureCard title={t('feature_createOrderSlip_title')} description={t('feature_createOrderSlip_desc')}>
-                            <OrderSlipManagementSection />
-                        </FeatureCard>
-                    </TabsContent>
-                    <TabsContent value="loyalty">
-                        <FeatureCard title={t('feature_loyaltyProgram_title')} description={t('feature_loyaltyProgram_desc')}>
-                           <LoyaltyManagement />
-                        </FeatureCard>
-                    </TabsContent>
-                </>
-            )}
-
-            {userRole === 'staff' && (
-                <>
-                    <TabsContent value="inventoryStatus">
-                        <FeatureCard title="Inventory Status" description="View current stock levels for all products." isLoading={isLoading}>
-                            <InventoryStatus products={products} />
-                        </FeatureCard>
-                    </TabsContent>
-                     <TabsContent value="stockManagement">
-                        <FeatureCard title="Stock Management" description="Update stock levels for products." isLoading={isLoading}>
-                            <StockManagement products={products} />
-                        </FeatureCard>
-                    </TabsContent>
-                </>
-            )}
-
-            {(userRole === 'owner' || userRole === 'admin') && (
-                <>
-                    <TabsContent value="products">
-                        <FeatureCard title={t('feature_eyewearCatalog_title')} description={t('feature_eyewearCatalog_desc')}>
-                             <EyewearCatalog />
-                        </FeatureCard>
-                    </TabsContent>
-                    <TabsContent value="reports">
-                        <ReportsSection />
-                    </TabsContent>
-                </>
-            )}
-            
-            {(userRole === 'owner') && (
-                 <TabsContent value="inventory">
-                     <FeatureCard title={t('feature_inventoryControl_title')} description={t('feature_inventoryControl_desc')} isLoading={isLoading}>
-                        <div className="grid gap-8 lg:grid-cols-3">
-                           <div className="lg:col-span-2">
+                {userRole === 'staff' && (
+                    <>
+                        <TabsContent value="inventoryStatus">
+                            <FeatureCard title="Inventory Status" description="View current stock levels for all products." isLoading={isLoading}>
                                 <InventoryStatus products={products} />
-                           </div>
-                           <div>
-                                <AddProductForm onAddProduct={() => {}}/>
-                           </div>
-                        </div>
-                    </FeatureCard>
-                </TabsContent>
-            )}
+                            </FeatureCard>
+                        </TabsContent>
+                        <TabsContent value="stockManagement">
+                            <FeatureCard title="Stock Management" description="Update stock levels for products." isLoading={isLoading}>
+                                <StockManagement products={products} />
+                            </FeatureCard>
+                        </TabsContent>
+                    </>
+                )}
 
+                {(userRole === 'owner' || userRole === 'admin') && (
+                    <>
+                        <TabsContent value="products">
+                            <FeatureCard title={t('feature_eyewearCatalog_title')} description={t('feature_eyewearCatalog_desc')}>
+                                <EyewearCatalog />
+                            </FeatureCard>
+                        </TabsContent>
+                        <TabsContent value="reports">
+                            <ReportsSection />
+                        </TabsContent>
+                    </>
+                )}
 
-             {userRole === 'owner' && (
-                 <>
-                    <TabsContent value="correspondence">
-                         <FeatureCard title={t('feature_aiAssistant_title')} description={t('feature_aiAssistant_desc')}>
-                            <CorrespondenceAssistant />
-                        </FeatureCard>
-                    </TabsContent>
-                    <TabsContent value="schedules">
-                        <FeatureCard title={t('feature_doctorSchedules_title')} description={t('feature_doctorSchedules_desc')}>
-                            <DoctorSchedule />
-                        </FeatureCard>
-                    </TabsContent>
-                    <TabsContent value="payments">
-                        <FeatureCard title={t('feature_adminPayments_title')} description={t('feature_adminPayments_desc')}>
-                            <AdminPaymentManager />
-                        </FeatureCard>
-                    </TabsContent>
-                </>
-            )}
-      
-            {userRole === 'staff' && (
-                <TabsContent value="support">
-                    <FeatureCard title="Support Guides" description="Access help guides and documentation.">
-                        <div className="space-y-6">
-                            <Accordion type="single" collapsible className="w-full">
-                                <AccordionItem value="item-1">
-                                    <AccordionTrigger>
-                                        <div className="flex items-center gap-2">
-                                            <HelpCircle className="h-4 w-4" />
-                                            <span>How do I create a new invoice?</span>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        Navigate to the "Invoices" tab, click "Create Invoice," fill in the patient and item details, and then click the "Create Invoice" button at the bottom. The system will calculate totals automatically.
-                                    </AccordionContent>
-                                </AccordionItem>
-                                 <AccordionItem value="item-2">
-                                     <AccordionTrigger>
-                                        <div className="flex items-center gap-2">
-                                            <HelpCircle className="h-4 w-4" />
-                                            <span>How do I schedule an appointment?</span>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        Go to the "Appointments" tab. Use the calendar to select a day, then fill out the "Book Appointment" form with the patient's name, doctor, date, and time. Click "Book Appointment" to confirm.
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-3">
-                                     <AccordionTrigger>
-                                        <div className="flex items-center gap-2">
-                                            <HelpCircle className="h-4 w-4" />
-                                            <span>How do I add loyalty points to a patient's account?</span>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        Go to the "Loyalty" tab, find the patient's membership card, enter the number of points in the "Add Points" input field, and click the "Add" button. The points will be updated in real-time.
-                                    </AccordionContent>
-                                </AccordionItem>
-                                <AccordionItem value="item-4">
-                                     <AccordionTrigger>
-                                        <div className="flex items-center gap-2">
-                                            <HelpCircle className="h-4 w-4" />
-                                            <span>What if I can't find a product with the barcode scanner?</span>
-                                        </div>
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        If the barcode scanner doesn't find a product, you can manually type the barcode number into the input field when creating an invoice or order slip. Alternatively, you can use the "Available Products" search bar to find and add products by name or brand.
-                                    </AccordionContent>
-                                </AccordionItem>
-                            </Accordion>
-
-                            <div className="grid md:grid-cols-2 gap-4">
-                                <Card>
-                                    <CardHeader className="flex-row gap-4 items-center">
-                                        <Phone className="w-8 h-8 text-primary" />
-                                        <div>
-                                            <CardTitle>Contact Support</CardTitle>
-                                            <CardDescription>Get help with technical or billing issues.</CardDescription>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent className="text-sm">
-                                        <p><strong>Technical:</strong> 555-0199 (Mon-Fri, 9am-5pm)</p>
-                                        <p><strong>Billing:</strong> 555-0198 (Mon-Fri, 9am-5pm)</p>
-                                    </CardContent>
-                                </Card>
-                                <Card className="flex flex-col justify-between">
-                                     <CardHeader className="flex-row gap-4 items-center">
-                                        <Book className="w-8 h-8 text-primary" />
-                                        <div>
-                                            <CardTitle>Documentation</CardTitle>
-                                            <CardDescription>Read in-depth guides.</CardDescription>
-                                        </div>
-                                    </CardHeader>
-                                    <CardContent>
-                                       <Button className="w-full">Go to Portal</Button>
-                                    </CardContent>
-                                </Card>
+                {(userRole === 'owner') && (
+                    <TabsContent value="inventory">
+                        <FeatureCard title={t('feature_inventoryControl_title')} description={t('feature_inventoryControl_desc')} isLoading={isLoading}>
+                            <div className="grid gap-8 lg:grid-cols-3">
+                                <div className="lg:col-span-2">
+                                    <InventoryStatus products={products} />
+                                </div>
+                                <div>
+                                    <AddProductForm onAddProduct={() => { }} />
+                                </div>
                             </div>
-                        </div>
-                    </FeatureCard>
-                </TabsContent>
-            )}
+                        </FeatureCard>
+                    </TabsContent>
+                )}
 
-            {(userRole === 'doctor' || userRole === 'patient') && (
-                <TabsContent value="prescriptions">
-                    <FeatureCard title={t('feature_managePrescriptions_title')} description={t('feature_managePrescriptions_desc')}>
-                        {userRole === 'patient' ? (
-                             patient ? <PatientDetailsDisplay patient={patient} /> : <p>Loading patient data...</p>
-                        ) : (
-                             <PrescriptionList />
-                        )}
-                    </FeatureCard>
-                </TabsContent>
-            )}
-        </Tabs>
-    </div>
-  );
+
+                {userRole === 'owner' && (
+                    <>
+                        <TabsContent value="correspondence">
+                            <FeatureCard title={t('feature_aiAssistant_title')} description={t('feature_aiAssistant_desc')}>
+                                <CorrespondenceAssistant />
+                            </FeatureCard>
+                        </TabsContent>
+                        <TabsContent value="schedules">
+                            <FeatureCard title={t('feature_doctorSchedules_title')} description={t('feature_doctorSchedules_desc')}>
+                                <DoctorSchedule />
+                            </FeatureCard>
+                        </TabsContent>
+                        <TabsContent value="payments">
+                            <FeatureCard title={t('feature_adminPayments_title')} description={t('feature_adminPayments_desc')}>
+                                <AdminPaymentManager />
+                            </FeatureCard>
+                        </TabsContent>
+                    </>
+                )}
+
+                {userRole === 'staff' && (
+                    <TabsContent value="support">
+                        <FeatureCard title="Support Guides" description="Access help guides and documentation.">
+                            <div className="space-y-6">
+                                <Accordion type="single" collapsible className="w-full">
+                                    <AccordionItem value="item-1">
+                                        <AccordionTrigger>
+                                            <div className="flex items-center gap-2">
+                                                <HelpCircle className="h-4 w-4" />
+                                                <span>How do I create a new invoice?</span>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            Navigate to the "Invoices" tab, click "Create Invoice," fill in the patient and item details, and then click the "Create Invoice" button at the bottom. The system will calculate totals automatically.
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                    <AccordionItem value="item-2">
+                                        <AccordionTrigger>
+                                            <div className="flex items-center gap-2">
+                                                <HelpCircle className="h-4 w-4" />
+                                                <span>How do I schedule an appointment?</span>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            Go to the "Appointments" tab. Use the calendar to select a day, then fill out the "Book Appointment" form with the patient's name, doctor, date, and time. Click "Book Appointment" to confirm.
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                    <AccordionItem value="item-3">
+                                        <AccordionTrigger>
+                                            <div className="flex items-center gap-2">
+                                                <HelpCircle className="h-4 w-4" />
+                                                <span>How do I add loyalty points to a patient's account?</span>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            Go to the "Loyalty" tab, find the patient's membership card, enter the number of points in the "Add Points" input field, and click the "Add" button. The points will be updated in real-time.
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                    <AccordionItem value="item-4">
+                                        <AccordionTrigger>
+                                            <div className="flex items-center gap-2">
+                                                <HelpCircle className="h-4 w-4" />
+                                                <span>What if I can't find a product with the barcode scanner?</span>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            If the barcode scanner doesn't find a product, you can manually type the barcode number into the input field when creating an invoice or order slip. Alternatively, you can use the "Available Products" search bar to find and add products by name or brand.
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                </Accordion>
+
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <Card>
+                                        <CardHeader className="flex-row gap-4 items-center">
+                                            <Phone className="w-8 h-8 text-primary" />
+                                            <div>
+                                                <CardTitle>Contact Support</CardTitle>
+                                                <CardDescription>Get help with technical or billing issues.</CardDescription>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent className="text-sm">
+                                            <p><strong>Technical:</strong> 555-0199 (Mon-Fri, 9am-5pm)</p>
+                                            <p><strong>Billing:</strong> 555-0198 (Mon-Fri, 9am-5pm)</p>
+                                        </CardContent>
+                                    </Card>
+                                    <Card className="flex flex-col justify-between">
+                                        <CardHeader className="flex-row gap-4 items-center">
+                                            <Book className="w-8 h-8 text-primary" />
+                                            <div>
+                                                <CardTitle>Documentation</CardTitle>
+                                                <CardDescription>Read in-depth guides.</CardDescription>
+                                            </div>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <Button className="w-full">Go to Portal</Button>
+                                        </CardContent>
+                                    </Card>
+                                </div>
+                            </div>
+                        </FeatureCard>
+                    </TabsContent>
+                )}
+
+                {(userRole === 'doctor' || userRole === 'patient') && (
+                    <TabsContent value="prescriptions">
+                        <FeatureCard title={t('feature_managePrescriptions_title')} description={t('feature_managePrescriptions_desc')}>
+                            {userRole === 'patient' ? (
+                                patient ? <PatientDetailsDisplay patient={patient} /> : <p>Loading patient data...</p>
+                            ) : (
+                                <PrescriptionList />
+                            )}
+                        </FeatureCard>
+                    </TabsContent>
+                )}
+            </Tabs>
+        </div>
+    );
 }
