@@ -38,7 +38,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         navigate('/login');
     };
     
-    if (pathname === '/login') {
+    if (pathname === '/') {
         return <>{children}</>;
     }
 
