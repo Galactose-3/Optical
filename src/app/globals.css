@@ -159,14 +159,14 @@ body.dark {
   @apply bg-background text-foreground;
   background-color: #1a2e1a;
   /* Dark green base */
-  background-image: radial-gradient(circle at top right, #76e812, #2b4d2b 50%, #390143);
+  background-image: radial-gradient(circle at top right, #0d9e84d0, #2c572c 50%, #0d5f02);
   /* Green gradient */
 }
 
 body.primary {
   @apply bg-background text-foreground;
   background-color: #1a1a2e;
-  background-image: radial-gradient(circle at top right, #2b046b, #373760 50%, #0afde9);
+  background-image: radial-gradient(circle at top right, #17012c, #373760 50%, #0afde9);
 }
 
 
@@ -178,7 +178,7 @@ body.regal {
 body.mint {
   @apply bg-background text-foreground;
   background-color: #302a2a;
-  background-image: radial-gradient(circle at top right, #0800ff, #5f5f9d 50%, #ffffff);
+  background-image: radial-gradient(circle at top right, #a5a5a9, #3b3bc1 50%, #f26a6a);
 }
 
 
@@ -256,7 +256,7 @@ aside .border-b {
 }
 
 .print-styles .text-muted-foreground {
-  color:hsl(0, 0, 100%);
+  color: hsl(0, 0, 100%);
 }
 
 .print-styles .text-green-400 {

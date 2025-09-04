@@ -27,6 +27,7 @@ import {
   Download,
   FileSpreadsheet,
   Loader2,
+  MapPin,
   HelpCircle,
   Phone,
   Book,
@@ -990,7 +991,7 @@ function ReportsSection() {
     const [isPrinting, setIsPrinting] = React.useState(false);
     const [csvData, setCsvData] = React.useState<any[]>([]);
     const [csvHeaders, setCsvHeaders] = React.useState<any[]>([]);
-    const csvLinkRef = React.useRef<any>(null);
+    const csvLinkRef = React.useRef<{ link: HTMLAnchorElement }>(null);
     const [activeTab, setActiveTab] = React.useState('sales');
 
     const handlePrint = () => {
