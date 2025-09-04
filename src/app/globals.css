@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -37,8 +36,8 @@ body {
   }
 
   .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 40% 98%;
+    --background: 200 80% 11%;
+    --foreground: 300 71% 98%;
     --card: 222 47% 11%;
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 11%;
@@ -118,30 +117,25 @@ body {
   }
 
   .mint {
-    --background: 220 10% 90%;
-    --foreground: 220 10% 15%;
-    --card: 220 10% 90%;
+    --background: 210 100% 50%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 100%;
     --card-foreground: 220 10% 15%;
-    --popover: 220 10% 90%;
+    --popover: 0 0% 100%;
     --popover-foreground: 220 10% 15%;
-    --primary: 150 40% 50%;
-    --primary-foreground: 150 40% 5%;
-    --secondary: 220 10% 85%;
+    --primary: 210 90% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 94%;
     --secondary-foreground: 220 10% 15%;
-    --muted: 220 10% 85%;
+    --muted: 220 20% 94%;
     --muted-foreground: 220 8% 45%;
-    --accent: 150 40% 70%;
-    --accent-foreground: 150 40% 10%;
-    --destructive: 0 60% 50%;
+    --accent: 210 90% 85%;
+    --accent-foreground: 210 90% 10%;
+    --destructive: 0 80% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 10% 80%;
-    --input: 220 10% 80%;
-    --ring: 150 40% 50%;
-    --chart-1: 150 40% 50%;
-    --chart-2: 160 40% 45%;
-    --chart-3: 170 40% 40%;
-    --chart-4: 0 60% 50%;
-    --chart-5: 30 70% 55%;
+    --border: 220 15% 90%;
+    --input: 220 15% 90%;
+    --ring: 210 90% 50%;
   }
 }
 
@@ -152,61 +146,65 @@ body {
 }
 
 body {
-    position: relative;
-    background-attachment: fixed;
+  position: relative;
+  background-attachment: fixed;
 }
 
 body.light {
-    @apply bg-background text-foreground;
-    background-image: none;
+  @apply bg-background text-foreground;
+  background-image: none;
 }
 
 body.dark {
-    @apply bg-background text-foreground;
-    background-color: #1a2e1a; /* Dark green base */
-    background-image: radial-gradient(circle at top right, #28d93a, #1a2e1a 50%, #0d9488); /* Green gradient */
+  @apply bg-background text-foreground;
+  background-color: #1a2e1a;
+  /* Dark green base */
+  background-image: radial-gradient(circle at top right, #76e812, #2b4d2b 50%, #390143);
+  /* Green gradient */
 }
 
 body.primary {
-    @apply bg-background text-foreground;
-    background-color: #1a1a2e;
-    background-image: radial-gradient(circle at top right, #6d28d9, #1a1a2e 50%, #0d9488);
+  @apply bg-background text-foreground;
+  background-color: #1a1a2e;
+  background-image: radial-gradient(circle at top right, #2b046b, #373760 50%, #0afde9);
 }
 
 
 body.regal {
-    @apply bg-background text-foreground;
-    background-image: radial-gradient(circle at top right, hsl(var(--primary)), hsl(var(--background)) 70%);
+  @apply bg-background text-foreground;
+  background-image: radial-gradient(circle at top right, hsl(var(--primary)), hsl(var(--background)) 70%);
 }
 
 body.mint {
-    @apply bg-background text-foreground;
-    background-image: none;
+  @apply bg-background text-foreground;
+  background-color: #302a2a;
+  background-image: radial-gradient(circle at top right, #0800ff, #5f5f9d 50%, #ffffff);
 }
 
 
 body::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABtQTFRF////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAz1wDDAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+EIEwcIEDGgM+gAAAAdaVRYdENyZWF0aW9uIFRpbWUAMjAxNzowODoxOSAxNDoyNDowOUhGgwAAAFlJREFUeNpjYBgFo4A8MLyLyBZYbEk2LILT7cskZtgiKy6xCIIoi4gks8cl8R+GAAuLiCPDleG6wlwuPhjAwnA3Qy4Xnxw3DAnD9QXx+4C4cW44bhx3jhi4yAIA7fEzU+SFXW8AAAAASUVORK5CYII=');
-    background-repeat: repeat;
-    opacity: 0.15;
-    pointer-events: none;
-    z-index: -1;
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyBAMAAADsEZWCAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAABtQTFRF////AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAz1wDDAAAAAlwSFlzAAALEwAACxMBAJqcGAAAAAd0SU1FB+EIEwcIEDGgM+gAAAAdaVRYdENyZWF0aW9uIFRpbWUAMjAxNzowODoxOSAxNDoyNDowOUhGgwAAAFlJREFUeNpjYBgFo4A8MLyLyBZYbEk2LILT7cskZtgiKy6xCIIoi4gks8cl8R+GAAuLiCPDleG6wlwuPhjAwnA3Qy4Xnxw3DAnD9QXx+4C4cW44bhx3jhi4yAIA7fEzU+SFXW8AAAAASUVORK5CYII=');
+  background-repeat: repeat;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: -1;
 }
 
-body.light::after, body.mint::after {
-    opacity: 0;
+body.light::after,
+body.mint::after {
+  opacity: 0;
 }
 
 
-.bg-card, 
-aside, 
-[data-sidebar="sidebar"], 
+.bg-card,
+aside,
+[data-sidebar="sidebar"],
 .bg-popover,
 [data-radix-popper-content-wrapper] {
   background-color: transparent !important;
@@ -221,26 +219,32 @@ header {
 }
 
 aside {
-   border-right: 1px solid hsl(var(--border) / 0.5) !important;
+  border-right: 1px solid hsl(var(--border) / 0.5) !important;
 }
 
 aside .border-b {
   border-bottom: 1px solid hsl(var(--border) / 0.5) !important;
 }
 
-[data-radix-collection-item] > button {
-    background-color: transparent !important;
+[data-radix-collection-item]>button {
+  background-color: transparent !important;
 }
 
 /* Styles for PDF Generation (black and white) */
 .print-styles,
-.print-styles div, 
+.print-styles div,
 .print-styles header,
 .print-styles p,
 .print-styles span,
-.print-styles h1, .print-styles h2, .print-styles h3, .print-styles h4, .print-styles h5, .print-styles h6,
-.print-styles td, .print-styles th, .print-styles label
- {
+.print-styles h1,
+.print-styles h2,
+.print-styles h3,
+.print-styles h4,
+.print-styles h5,
+.print-styles h6,
+.print-styles td,
+.print-styles th,
+.print-styles label {
   background-color: #ffffff !important;
   color: #000000 !important;
   -webkit-print-color-adjust: exact;
@@ -248,25 +252,29 @@ aside .border-b {
 }
 
 .print-styles .text-primary {
-    color: #000000 !important;
+  color: #ffffff !important;
 }
 
 .print-styles .text-muted-foreground {
-  color: #555555 !important;
-}
-.print-styles .text-green-400 {
-    color: #000000 !important;
+  color:hsl(0, 0, 100%);
 }
 
-.print-styles #advance-paid-container > input {
+.print-styles .text-green-400 {
+  color: #ffffff !important;
+}
+
+.print-styles #advance-paid-container>input {
   display: none;
 }
+
 .print-styles #advance-paid-container::after {
   content: attr(data-value);
   display: block;
   text-align: right;
-  padding: 0 0.75rem; /* mimic input padding */
+  padding: 0 0.75rem;
+  /* mimic input padding */
 }
+
 .print-styles input {
   border: none !important;
   padding: 0 !important;
@@ -278,16 +286,20 @@ aside .border-b {
 @media print {
   body {
     background: #fff;
-    font-size: 10px; /* Smaller font for thermal printers */
+    font-size: 10px;
+    /* Smaller font for thermal printers */
   }
 
   /* Hide elements that shouldn't be printed */
-  aside, header, .print-hidden {
+  aside,
+  header,
+  .print-hidden {
     display: none !important;
   }
 
   /* Reset layout for printing */
-  .sm\:pl-60, main {
+  .sm\:pl-60,
+  main {
     padding: 0 !important;
     margin: 0 !important;
   }
@@ -299,32 +311,68 @@ aside .border-b {
 
   /* Style the invoice card for printing */
   #invoice {
-    width: 80mm; /* Standard thermal printer width */
+    width: 80mm;
+    /* Standard thermal printer width */
     max-width: 80mm;
     box-shadow: none !important;
     border: none !important;
     padding: 2mm;
-    font-family: 'Courier New', Courier, monospace; /* Use a monospace font */
+    font-family: 'Courier New', Courier, monospace;
+    /* Use a monospace font */
   }
 
   /* Adjust font sizes and spacing for receipt */
-  #invoice .text-3xl { font-size: 16px; }
-  #invoice .text-lg { font-size: 12px; }
-  #invoice .text-sm { font-size: 10px; }
-  #invoice .text-xs { font-size: 8px; }
-  #invoice .p-8 { padding: 5px !important; }
-  #invoice .my-6 { margin-top: 10px !important; margin-bottom: 10px !important; }
-  #invoice .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  #invoice .gap-4 { gap: 8px; }
+  #invoice .text-3xl {
+    font-size: 16px;
+  }
+
+  #invoice .text-lg {
+    font-size: 12px;
+  }
+
+  #invoice .text-sm {
+    font-size: 10px;
+  }
+
+  #invoice .text-xs {
+    font-size: 8px;
+  }
+
+  #invoice .p-8 {
+    padding: 5px !important;
+  }
+
+  #invoice .my-6 {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+  }
+
+  #invoice .grid-cols-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  #invoice .gap-4 {
+    gap: 8px;
+  }
 
   /* Hide input borders and buttons */
-  .print\:border-none { border: none !important; }
-  .print\:px-0 { padding-left: 0 !important; padding-right: 0 !important; }
-  button.print\:hidden { display: none !important; }
-  
-  #advance-paid-container > input {
+  .print\:border-none {
+    border: none !important;
+  }
+
+  .print\:px-0 {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  button.print\:hidden {
+    display: none !important;
+  }
+
+  #advance-paid-container>input {
     display: none;
   }
+
   #advance-paid-container::after {
     content: attr(data-value);
     display: block;
@@ -335,7 +383,9 @@ aside .border-b {
   table {
     width: 100%;
   }
-  th, td {
+
+  th,
+  td {
     padding: 2px !important;
   }
 }
