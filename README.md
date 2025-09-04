@@ -94,11 +94,13 @@ App will be available at: **[http://localhost:5173/](http://localhost:5173/)**
 
 ## 📸 Screenshots
 
-*Login Page
+## Login Page
 [Screenshot 2025-09-04 162252.png](https://github.com/Galactose-3/Optical/blob/main/ScreenShots/Screenshot%202025-09-04%20162150.png)
 
-
-*Dashboard
+##Dashboard
+[Screenshot 2025-09-04 162206.png](https://github.com/Galactose-3/Optical/blob/main/ScreenShots/Screenshot%202025-09-04%20162206.png)
+[Screenshot 2025-09-04 162250.png](https://github.com/Galactose-3/Optical/blob/main/ScreenShots/Screenshot%202025-09-04%20162150.png)
+[Screenshot 2025-09-04 162228.png](https://github.com/Galactose-3/Optical/blob/main/ScreenShots/Screenshot%202025-09-04%20162228.png)
 
 ---
 
