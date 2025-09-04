@@ -70,7 +70,6 @@ import { PatientDetailsDisplay } from '@/components/patient-details-display';
 import { format, differenceInDays, parseISO, addDays } from 'date-fns';
 import { OrderSlipDisplay } from '@/components/order-slip-display';
 import { AppointmentScheduler } from '@/components/appointment-scheduler';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { CSVLink } from 'react-csv';
@@ -991,7 +990,7 @@ function ReportsSection() {
     const [isPrinting, setIsPrinting] = React.useState(false);
     const [csvData, setCsvData] = React.useState<any[]>([]);
     const [csvHeaders, setCsvHeaders] = React.useState<any[]>([]);
-    const csvLinkRef = React.useRef<{ link: HTMLAnchorElement }>(null);
+    const csvLinkRef = React.useRef<any>(null);
     const [activeTab, setActiveTab] = React.useState('sales');
 
     const handlePrint = () => {
@@ -1131,7 +1130,7 @@ function ReportsSection() {
     const handleExportCsv = () => {
         prepareCsvData(activeTab).then(() => {
             setTimeout(() => {
-                csvLinkRef.current?.link.click();
+                csvLinkRef.current?.click();
                 toast({ title: 'CSV Exported', description: 'The report data has been downloaded.' });
             }, 100);
         });
