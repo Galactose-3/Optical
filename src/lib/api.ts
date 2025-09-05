@@ -1,85 +1,116 @@
+// api.ts
+
+const BASE_URL = "https://staff-optical-production.up.railway.app/api";
 
 /**
- * @file This file contains functions to fetch data from the API endpoints.
- * It provides a clean interface for the frontend components to interact
- * with the backend.
+ * Generic fetch wrapper with error handling
  */
+async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
+    try {
+        const res = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                ...(options.headers || {}),
+            },
+        });
 
-import type { Patient, Product, Invoice, PurchaseOrder, Appointment, Shop, Song, AdminPaymentNotice, Doctor } from './types';
+        if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+        }
 
-// Simulate network delay
-const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
-
-// Helper function to fetch data from the API
-async function fetchData<T>(endpoint: string): Promise<T> {
-    // In a real app, you would fetch from your domain
-    const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL || '';
-    const res = await fetch(`${baseUrl}/api/${endpoint}`);
-    
-    if (!res.ok) {
-        // This will activate the closest `error.js` Error Boundary
-        throw new Error(`Failed to fetch ${endpoint}`);
+        return await res.json();
+    } catch (error) {
+        console.error("❌ API request failed:", error);
+        throw error;
     }
-    
-    // Adding a small delay to simulate network latency
-    await delay(Math.random() * 500 + 100);
-
-    return res.json();
 }
 
-export async function getPatients(): Promise<Patient[]> {
-    return fetchData<Patient[]>('patients');
+//
+// =====================
+// CUSTOMER ENDPOINTS
+// =====================
+//
+
+export function createCustomer(data: {
+    name: string;
+    phone: string;
+    address: string;
+}) {
+    return request(`${BASE_URL}/customer`, {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
 }
 
-export async function getProducts(): Promise<Product[]> {
-    return fetchData<Product[]>('products');
+export function getCustomers(page = 1, limit = 10, search = "") {
+    return request(
+        `${BASE_URL}/customer?page=${page}&limit=${limit}&search=${search}`
+    );
 }
 
-export async function getInvoices(): Promise<Invoice[]> {
-    return fetchData<Invoice[]>('invoices');
+export function getCustomer(id: number) {
+    return request(`${BASE_URL}/customer/${id}`);
 }
 
-export async function getPurchaseOrders(): Promise<PurchaseOrder[]> {
-    return fetchData<PurchaseOrder[]>('purchase-orders');
+export function createCustomerWithInvoice(data: any) {
+    return request(`${BASE_URL}/customer/invoice`, {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
 }
 
-export async function getAppointments(): Promise<Appointment[]> {
-    return fetchData<Appointment[]>('appointments');
+export function getCustomerHotspots() {
+    return request(`${BASE_URL}/customer/hotspots`);
 }
 
-export async function getShops(): Promise<Shop[]> {
-    return fetchData<Shop[]>('shops');
+//
+// =====================
+// PATIENT ENDPOINTS
+// =====================
+//
+
+export function createPatient(data: {
+    name: string;
+    age: number;
+    gender: string;
+    phone?: string;
+    address?: string;
+    medicalHistory?: string;
+}) {
+    return request(`${BASE_URL}/patient`, {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
 }
 
-export async function getAdminPaymentNotices(): Promise<AdminPaymentNotice[]> {
-    return fetchData<AdminPaymentNotice[]>('admin-payment-notices');
+export function getPatients(page = 1, limit = 10) {
+    return request(`${BASE_URL}/patient?page=${page}&limit=${limit}`);
 }
 
-export async function getDoctors(): Promise<Doctor[]> {
-    return fetchData<Doctor[]>('doctors');
+export function getPatient(id: number) {
+    return request(`${BASE_URL}/patient/${id}`);
 }
 
-export async function getAdmins() {
-    return fetchData<any[]>('admins');
+//
+// =====================
+// PRESCRIPTION ENDPOINTS
+// =====================
+//
+
+export function createPrescription(data: any) {
+    return request(`${BASE_URL}/prescription`, {
+        method: "POST",
+        body: JSON.stringify(data),
+    });
 }
 
-export async function getStaff() {
-    return fetchData<any[]>('staff');
+export function getPrescriptions(patientId: number, page = 1, limit = 10) {
+    return request(
+        `${BASE_URL}/prescription?page=${page}&limit=${limit}&patientId=${patientId}`
+    );
 }
 
-// Example of a POST request simulation
-export async function createProduct(productData: Omit<Product, 'id'>): Promise<Product> {
-    console.log('Simulating create new product...', productData);
-    // In a real app, this would be a POST request
-    // const res = await fetch('/api/products', { method: 'POST', body: JSON.stringify(productData) });
-    // const newProduct = await res.json();
-    // return newProduct;
-    await delay(500);
-    const newProduct: Product = {
-        id: `PROD-${Date.now()}`,
-        ...productData
-    };
-    // Note: This only adds to the in-memory mock data for the demo.
-    // A real backend would persist this.
-    return newProduct;
+export function getPrescription(id: number) {
+    return request(`${BASE_URL}/prescription/${id}`);
 }
