@@ -9,8 +9,11 @@ export default defineConfig({
             "@": path.resolve(__dirname, "./src"),
         },
     },
-    build: {
-        outDir: "dist",  // ensure build goes into dist
+    server: {
+        port: 5173,
     },
-    base: "./", // ✅ makes assets load correctly when served by Express
+    build: {
+        outDir: "dist",
+    },
+    base: "./", // ✅ important for Express serving
 })

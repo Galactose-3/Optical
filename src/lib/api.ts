@@ -27,7 +27,6 @@ async function fetchData<T>(endpoint: string): Promise<T> {
     return res.json();
 }
 
-
 export async function getPatients(): Promise<Patient[]> {
     return fetchData<Patient[]>('patients');
 }
