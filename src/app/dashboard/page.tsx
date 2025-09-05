@@ -393,7 +393,7 @@ function OwnerDashboard() {
 
     return (
         <div className="space-y-8">
-            <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
+            <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2 md:gap-6 lg:grid-cols-4 lg:gap-8">
                 <StatCard
                     title="Total Revenue"
                     icon={DollarSign}
@@ -1290,7 +1290,7 @@ export default function UnifiedDashboard() {
             </div>
 
             <Tabs defaultValue="dashboard" className="w-full">
-                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 h-auto">
+                <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 h-auto gap-1">
                     <TabsTrigger value="dashboard"><LayoutDashboard className="w-4 h-4 mr-2" />{t('tab_dashboard')}</TabsTrigger>
 
                     {(userRole === 'admin' || userRole === 'owner' || userRole === 'staff') && (

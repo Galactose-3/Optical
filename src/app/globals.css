@@ -143,6 +143,23 @@ body {
   * {
     @apply border-border;
   }
+
+  /* Mobile touch targets */
+  button, [role="button"], input, select, textarea {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Better mobile scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* Mobile viewport height fix */
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
 }
 
 body {

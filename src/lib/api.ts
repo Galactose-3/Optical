@@ -6,22 +6,28 @@
 
 import type { Patient, Product, Invoice, PurchaseOrder, Appointment, Shop, Song, AdminPaymentNotice, Doctor } from './types';
 
+// 🔑 Auth token (configure in .env as VITE_API_TOKEN)
+const AUTH_TOKEN = import.meta.env.VITE_API_TOKEN || 'mysecrettoken';
+
 // Simulate network delay
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 // Helper function to fetch data from the API
-async function fetchData<T>(endpoint: string): Promise<T> {
-    // Use Railway backend URL in production, localhost in development
+async function fetchData<T>(endpoint: string, requiresAuth = false): Promise<T> {
     const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL ||
                     (import.meta.env.PROD ? 'https://staff-optical-production.up.railway.app' : 'http://localhost:3000');
 
     console.log(`🔗 API Request: ${baseUrl}/api/${endpoint}`);
 
-    const res = await fetch(`${baseUrl}/api/${endpoint}`, {
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+    };
+
+    if (requiresAuth) {
+        headers['Authorization'] = `Bearer ${AUTH_TOKEN}`;
+    }
+
+    const res = await fetch(`${baseUrl}/api/${endpoint}`, { headers });
 
     if (!res.ok) {
         const errorText = await res.text();
@@ -29,7 +35,6 @@ async function fetchData<T>(endpoint: string): Promise<T> {
         throw new Error(`Failed to fetch ${endpoint}: ${res.status} ${res.statusText}`);
     }
 
-    // Adding a small delay to simulate network latency
     await delay(Math.random() * 500 + 100);
 
     const data = await res.json();
@@ -38,17 +43,23 @@ async function fetchData<T>(endpoint: string): Promise<T> {
 }
 
 // Helper function for POST requests
-async function postData<T>(endpoint: string, data: any): Promise<T> {
+async function postData<T>(endpoint: string, data: any, requiresAuth = false): Promise<T> {
     const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL ||
                     (import.meta.env.PROD ? 'https://staff-optical-production.up.railway.app' : 'http://localhost:3000');
 
     console.log(`📤 API POST Request: ${baseUrl}/api/${endpoint}`, data);
 
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+    };
+
+    if (requiresAuth) {
+        headers['Authorization'] = `Bearer ${AUTH_TOKEN}`;
+    }
+
     const res = await fetch(`${baseUrl}/api/${endpoint}`, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(data),
     });
 
@@ -64,39 +75,79 @@ async function postData<T>(endpoint: string, data: any): Promise<T> {
     return responseData;
 }
 
+// -----------------------------
+// Patients
+// -----------------------------
 export async function getPatients(): Promise<Patient[]> {
      return fetchData<Patient[]>('patients');
- }
+}
 
+export interface NewPatient {
+    name: string;
+    age: number;
+    gender: string;
+    phone?: string;
+    address?: string;
+    medicalHistory?: string;
+}
+
+export interface PatientResponse {
+    id: number;
+    name: string;
+    age: number;
+    gender: string;
+    phone?: string;
+    address?: string;
+    medicalHistory?: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export async function createPatient(patientData: NewPatient): Promise<PatientResponse> {
+    return postData<PatientResponse>('patient', patientData, true); // requires auth
+}
+
+// -----------------------------
+// Products
+// -----------------------------
 export async function getProduct(): Promise<Product[]> {
     return fetchData<Product[]>('products');
 }
-
-// Alias for components that expect getProducts
 export const getProducts = getProduct;
 
+// -----------------------------
+// Invoices
+// -----------------------------
 export async function getInvoice(): Promise<Invoice[]> {
     return fetchData<Invoice[]>('invoices');
 }
-
-// Alias for components that expect getInvoices
 export const getInvoices = getInvoice;
 
+// -----------------------------
+// Purchase Orders
+// -----------------------------
 export async function getPurchaseOrder(): Promise<PurchaseOrder[]> {
     return fetchData<PurchaseOrder[]>('purchase-orders');
 }
-
-// Alias for components that expect getPurchaseOrders
 export const getPurchaseOrders = getPurchaseOrder;
 
+// -----------------------------
+// Appointments
+// -----------------------------
 export async function getAppointments(): Promise<Appointment[]> {
     return fetchData<Appointment[]>('appointments');
 }
 
+// -----------------------------
+// Shops
+// -----------------------------
 export async function getShops(): Promise<Shop[]> {
     return fetchData<Shop[]>('shops');
 }
 
+// -----------------------------
+// Admin
+// -----------------------------
 export async function getAdminPaymentNotices(): Promise<AdminPaymentNotice[]> {
     return fetchData<AdminPaymentNotice[]>('admin-payment-notices');
 }
@@ -113,28 +164,9 @@ export async function getStaff() {
     return fetchData<any[]>('staff');
 }
 
-// Example of a POST request simulation
-export async function createProduct(productData: Omit<Product, 'id'>): Promise<Product> {
-    console.log('Simulating create new product...', productData);
-    // In a real app, this would be a POST request
-    // const res = await fetch('/api/products', { method: 'POST', body: JSON.stringify(productData) });
-    // const newProduct = await res.json();
-    // return newProduct;
-    await delay(500);
-    const newProduct: Product = {
-        id: `PROD-${Date.now()}`,
-        ...productData
-    };
-    // Note: This only adds to the in-memory mock data for the demo.
-    // A real backend would persist this.
-    return newProduct;
-}
-
-// -------------------------------------------------------------
-// New API Functions for Customer, Prescription, Patient, Walk-in Invoice
-// -------------------------------------------------------------
-
-// Customer API functions
+// -----------------------------
+// Customers
+// -----------------------------
 export interface Customer {
     id: number;
     name: string;
@@ -174,7 +206,7 @@ export async function getCustomers(params?: { page?: number; limit?: number; sea
     if (params?.page) searchParams.append('page', params.page.toString());
     if (params?.limit) searchParams.append('limit', params.limit.toString());
     if (params?.search) searchParams.append('search', params.search);
-    
+
     const queryString = searchParams.toString();
     const endpoint = queryString ? `customer?${queryString}` : 'customer';
     return fetchData<CustomerListResponse>(endpoint);
@@ -188,7 +220,9 @@ export async function getCustomerHotspots(): Promise<Array<{ address: string; cu
     return fetchData<Array<{ address: string; customerCount: number }>>('customer/hotspots');
 }
 
-// Prescription API functions
+// -----------------------------
+// Prescriptions
+// -----------------------------
 export interface PrescriptionEye {
     sph: number;
     cyl: number;
@@ -205,7 +239,7 @@ export interface Prescription {
     leftEye: PrescriptionEye;
     createdAt: string;
     updatedAt: string;
-    patient?: { id: number; name: string };
+    patient?: { id: number; name: string; age?: number; gender?: string };
 }
 
 export interface PrescriptionListResponse {
@@ -228,7 +262,7 @@ export async function getPrescriptions(params?: { page?: number; limit?: number;
     if (params?.page) searchParams.append('page', params.page.toString());
     if (params?.limit) searchParams.append('limit', params.limit.toString());
     if (params?.patientId) searchParams.append('patientId', params.patientId.toString());
-    
+
     const queryString = searchParams.toString();
     const endpoint = queryString ? `prescription?${queryString}` : 'prescription';
     return fetchData<PrescriptionListResponse>(endpoint);
@@ -238,31 +272,9 @@ export async function getPrescription(id: number): Promise<Prescription> {
     return fetchData<Prescription>(`prescription/${id}`);
 }
 
-// Patient API functions
-export interface NewPatient {
-    name: string;
-    age: number;
-    gender: string;
-    phone?: string;
-    address?: string;
-    medicalHistory?: string;
-}
-
-export interface PatientResponse {
-    id: number;
-    name: string;
-    age: number;
-    gender: string;
-    phone?: string;
-    address?: string;
-    medicalHistory?: string;
-}
-
-export async function createPatient(patientData: NewPatient): Promise<PatientResponse> {
-    return postData<PatientResponse>('patient', patientData);
-}
-
-// Walk-in Invoice API functions
+// -----------------------------
+// Walk-in Invoice
+// -----------------------------
 export interface WalkInInvoiceItem {
     productId: number;
     quantity: number;

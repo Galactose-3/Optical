@@ -44,7 +44,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
     return (
         <div className="flex min-h-screen w-full flex-col">
-            <header className="fixed top-0 flex h-16 w-full items-center gap-4 border-b bg-background/10 px-4 backdrop-blur-xl md:px-6 z-50">
+            <header className="fixed top-0 flex h-16 w-full items-center gap-2 border-b bg-background/10 px-3 backdrop-blur-xl md:px-6 md:gap-4 z-50">
                 <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
                     <Logo />
                 </nav>
@@ -96,7 +96,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </Button>
                 </div>
             </header>
-            <main className="flex flex-1 flex-col gap-4 p-4 pt-20 md:gap-8 md:p-8 md:pt-24">
+            <main className="flex flex-1 flex-col gap-4 p-4 pt-20 md:gap-8 md:p-6 lg:p-8 md:pt-24">
                 {children}
             </main>
       </div>
