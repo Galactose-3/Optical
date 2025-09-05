@@ -11,24 +11,39 @@ const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 // Helper function to fetch data from the API
 async function fetchData<T>(endpoint: string): Promise<T> {
-    // In a real app, you would fetch from your domain
-    const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL || '';
-    const res = await fetch(`${baseUrl}/api/${endpoint}`);
+    // Use Railway backend URL in production, localhost in development
+    const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL ||
+                    (import.meta.env.PROD ? 'https://staff-optical-production.up.railway.app' : 'http://localhost:3000');
+
+    console.log(`🔗 API Request: ${baseUrl}/api/${endpoint}`);
+
+    const res = await fetch(`${baseUrl}/api/${endpoint}`, {
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
 
     if (!res.ok) {
-        // This will activate the closest `error.js` Error Boundary
-        throw new Error(`Failed to fetch ${endpoint}`);
+        const errorText = await res.text();
+        console.error(`❌ API Error [${res.status}]: ${endpoint}`, errorText);
+        throw new Error(`Failed to fetch ${endpoint}: ${res.status} ${res.statusText}`);
     }
 
     // Adding a small delay to simulate network latency
     await delay(Math.random() * 500 + 100);
 
-    return res.json();
+    const data = await res.json();
+    console.log(`✅ API Success: ${endpoint}`, data);
+    return data;
 }
 
 // Helper function for POST requests
 async function postData<T>(endpoint: string, data: any): Promise<T> {
-    const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL || '';
+    const baseUrl = import.meta.env.VITE_PUBLIC_API_BASE_URL ||
+                    (import.meta.env.PROD ? 'https://staff-optical-production.up.railway.app' : 'http://localhost:3000');
+
+    console.log(`📤 API POST Request: ${baseUrl}/api/${endpoint}`, data);
+
     const res = await fetch(`${baseUrl}/api/${endpoint}`, {
         method: 'POST',
         headers: {
@@ -38,11 +53,15 @@ async function postData<T>(endpoint: string, data: any): Promise<T> {
     });
 
     if (!res.ok) {
-        throw new Error(`Failed to post to ${endpoint}`);
+        const errorText = await res.text();
+        console.error(`❌ API POST Error [${res.status}]: ${endpoint}`, errorText);
+        throw new Error(`Failed to post to ${endpoint}: ${res.status} ${res.statusText}`);
     }
 
     await delay(Math.random() * 500 + 100);
-    return res.json();
+    const responseData = await res.json();
+    console.log(`✅ API POST Success: ${endpoint}`, responseData);
+    return responseData;
 }
 
 export async function getPatients(): Promise<Patient[]> {

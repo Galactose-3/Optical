@@ -23,6 +23,32 @@ Developed using **React (Vite)**, **Node.js**, **HTML**, **CSS**, and **JavaScri
 * **Database:** (add your DB here – e.g., MongoDB/MySQL/PostgreSQL)
 * **Other Tools:** REST API, JSON
 
+## 🌐 Deployment Configuration
+
+### Environment Variables
+
+For production deployment (Vercel), set the following environment variable:
+
+```bash
+VITE_PUBLIC_API_BASE_URL=https://staff-optical-production.up.railway.app/
+```
+
+Replace `your-railway-app` with your actual Railway backend URL.
+
+### Vercel Environment Variables Setup
+
+1. Go to your Vercel project dashboard
+2. Navigate to Settings → Environment Variables
+3. Add a new variable:
+   - **Name**: `VITE_PUBLIC_API_BASE_URL`
+   - **Value**: `https://staff-optical-production.up.railway.app/`
+   - **Environment**: Production (and Preview if needed)
+
+### Development vs Production
+
+- **Development**: Uses `http://localhost:3000` (Vite proxy)
+- **Production**: Uses the Railway backend URL from environment variable
+
 ---
 
 ## 📂 Project Structure

@@ -11,3 +11,5 @@ functions/node_modules/
 
 # Optional: ignore big binary files
 *.node
+
+.vercel

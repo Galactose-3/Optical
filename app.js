@@ -45,4 +45,13 @@ app.use(function (err, req, res, next) {
   res.json({ error: err.message }); // send JSON instead of rendering Jade error page
 });
 
+// For Vercel serverless functions
 module.exports = app;
+
+// For local development
+if (require.main === module) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
