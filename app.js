@@ -11,49 +11,38 @@ var apiRouter = require('./routes/api');
 
 var app = express();
 
-// Enable CORS for all routes
+// Enable CORS
 app.use(cors());
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
-
+// Middlewares
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// Serve React frontend build
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// API routes
 app.use('/api', apiRouter);
-// Serve React frontend in production
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "dist")));
+app.use('/users', usersRouter);
+app.use('/', indexRouter);
 
-  app.use('/', indexRouter);
-  app.use('/users', usersRouter);
-  app.use('/api', apiRouter);
+// Catch-all: send back React index.html for any other route
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+});
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "dist", "index.html"));
-  });
-}
-
-// catch 404 and forward to error handler
+// Error handling
 app.use(function (req, res, next) {
   next(createError(404));
 });
 
-// error handler
 app.use(function (err, req, res, next) {
-  // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
-
-  // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  res.json({ error: err.message }); // send JSON instead of rendering Jade error page
 });
 
 module.exports = app;

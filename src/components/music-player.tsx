@@ -37,6 +37,8 @@ function Player() {
     togglePlayPause,
     seek,
     load,
+    isReady,
+    error,
   } = useAudioPlayer();
   
   const [songIndex, setSongIndex] = React.useState(0);
@@ -110,6 +112,16 @@ function Player() {
 
   return (
     <div className="flex flex-col gap-4">
+      {!isReady && (
+        <div className="text-center py-4">
+          <p>Loading audio...</p>
+        </div>
+      )}
+      {error && (
+        <div className="text-center py-4 text-red-500">
+          <p>Error loading audio: {error}</p>
+        </div>
+      )}
       <div className="relative">
         <img
           src={currentSong.albumArtUrl}
