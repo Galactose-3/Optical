@@ -69,7 +69,11 @@ export function AddProductForm({ onAddProduct }: AddProductFormProps) {
     }
 
     const onSubmit = (data: ProductFormData) => {
-        onAddProduct(data);
+        const productData = {
+            ...data,
+            description: data.description || '',
+        };
+        onAddProduct(productData);
         toast({
             title: 'Product Added',
             description: `${data.name} has been added to the inventory.`

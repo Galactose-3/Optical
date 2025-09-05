@@ -46,6 +46,10 @@ function Player() {
 
   const currentSong = songs[songIndex];
 
+  const handleNext = () => {
+    setSongIndex((prev) => (prev + 1) % songs.length);
+  };
+
   React.useEffect(() => {
     if (currentSong && load) {
       load({
@@ -54,10 +58,10 @@ function Player() {
         html5: true,
         format: ["mp3"],
         onend: handleNext,
-      });
+      } as any);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [songIndex, load]);
+  }, [songIndex, load, playing, handleNext]);
   
   React.useEffect(() => {
       const interval = setInterval(() => {
@@ -68,10 +72,10 @@ function Player() {
       return () => clearInterval(interval);
   }, [playing, getPosition]);
 
+  React.useEffect(() => {
+    setCurrentVolume(volume);
+  }, [volume]);
 
-  const handleNext = () => {
-    setSongIndex((prev) => (prev + 1) % songs.length);
-  };
 
   const handlePrev = () => {
     setSongIndex((prev) => (prev - 1 + songs.length) % songs.length);

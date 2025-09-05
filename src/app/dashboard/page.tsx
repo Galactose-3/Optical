@@ -87,7 +87,7 @@ import { InvoiceReport } from '@/components/invoice-report';
 import AdminPaymentManager from '@/components/admin-payment-manager';
 import InventoryStatus from '@/components/inventory-status';
 import StockManagement from '@/components/stock-management';
-import { useRouter } from 'next/navigation';
+import { useNavigate } from 'react-router-dom';
 import { getPatients, getProducts, getInvoices, getAppointments, getPurchaseOrders, getShops, getDoctors, getAdminPaymentNotices, getStaff, getAdmins } from '@/lib/api';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage } from '@/context/language-context';
@@ -130,14 +130,14 @@ const StatCard = ({ title, icon: Icon, value, description, isLoading }: { title:
 }
 
 function LogoutButton({ fullWidth = false }: { fullWidth?: boolean }) {
-    const router = useRouter();
+    const navigate = useNavigate();
     const { t } = useLanguage();
 
     const handleLogout = () => {
         document.cookie = "currentUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie = "userRole=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         document.cookie = "patientId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        router.push('/login');
+        navigate('/login');
     };
 
     return (
@@ -1028,7 +1028,7 @@ function ReportsSection() {
     const [isPrinting, setIsPrinting] = React.useState(false);
     const [csvData, setCsvData] = React.useState<any[]>([]);
     const [csvHeaders, setCsvHeaders] = React.useState<any[]>([]);
-    const csvLinkRef = React.useRef<{ link: HTMLAnchorElement }>(null);
+    const csvLinkRef = React.useRef<any>(null);
     const [activeTab, setActiveTab] = React.useState('sales');
 
     const handlePrint = () => {

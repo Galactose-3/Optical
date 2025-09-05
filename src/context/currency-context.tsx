@@ -14,11 +14,11 @@ function getExchangeRate(from: string, to: string): number {
     }
     
     // Fallback for direct conversion if available (legacy support)
-    if (from === 'USD' && MOCK_RATES.USD[to]) {
-      return MOCK_RATES.USD[to];
+    if (from === 'USD' && MOCK_RATES[to]) {
+      return MOCK_RATES[to];
     }
-    if (to === 'USD' && MOCK_RATES.INR[from]) {
-       return MOCK_RATES.INR[from];
+    if (to === 'USD' && MOCK_RATES[from]) {
+       return 1 / MOCK_RATES[from];
     }
 
     // Default to 1 if no rate is found to avoid breaking calculations
@@ -103,7 +103,7 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     const locale = currencies.find(c => c.code === displayCurrency)?.locale || 'en-US';
 
     const options = {
-      style: 'currency',
+      style: 'currency' as const,
       currency: displayCurrency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,

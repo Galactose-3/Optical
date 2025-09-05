@@ -5,7 +5,6 @@ import * as React from 'react';
 import type { Product, Invoice } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import Image from 'next/image';
 import { Crown } from 'lucide-react';
 import { getProducts, getInvoices } from '@/lib/api';
 import { Skeleton } from './ui/skeleton';
@@ -107,7 +106,7 @@ export default function BestSellerByPriceRange() {
                 ) : bestSeller ? (
                     <div className="flex flex-col sm:flex-row gap-6 items-center">
                         <div className="relative">
-                            <Image
+                            <img
                                 src={`https://picsum.photos/seed/${bestSeller.product.id}/400/300`}
                                 alt={bestSeller.product.name}
                                 width={200}

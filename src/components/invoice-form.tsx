@@ -196,7 +196,9 @@ export function InvoiceForm({ onCreate }: InvoiceFormProps) {
     const onSubmit = (data: InvoiceFormData) => {
         const invoiceData = {
             ...data,
-            patientId: `CUST-${Date.now()}` // Create a temporary ID
+            shopId: 'default-shop', // Assuming a default shop ID; update as needed
+            issueDate: data.issueDate.toISOString(),
+            dueDate: data.dueDate.toISOString(),
         };
         onCreate(invoiceData);
         toast({

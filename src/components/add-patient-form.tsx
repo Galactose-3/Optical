@@ -113,7 +113,9 @@ export function AddPatientForm({ onAddPatient }: AddPatientFormProps) {
             address: {
                 city: data.address?.city || 'Unknown',
                 state: data.address?.state || ''
-            }
+            },
+            insuranceProvider: data.insuranceProvider || '',
+            insurancePolicyNumber: data.insurancePolicyNumber || ''
         }
         onAddPatient(newPatientData);
         toast({
