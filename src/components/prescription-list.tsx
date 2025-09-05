@@ -22,7 +22,7 @@ export function PrescriptionList() {
         async function fetchData() {
             setIsLoading(true);
             const data = await getPatients();
-            setPatients(data);
+            setPatients(data as Patient[]);
             setIsLoading(false);
         }
         fetchData();

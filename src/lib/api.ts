@@ -53,13 +53,22 @@ export async function getProduct(): Promise<Product[]> {
     return fetchData<Product[]>('products');
 }
 
+// Alias for components that expect getProducts
+export const getProducts = getProduct;
+
 export async function getInvoice(): Promise<Invoice[]> {
     return fetchData<Invoice[]>('invoices');
 }
 
+// Alias for components that expect getInvoices
+export const getInvoices = getInvoice;
+
 export async function getPurchaseOrder(): Promise<PurchaseOrder[]> {
     return fetchData<PurchaseOrder[]>('purchase-orders');
 }
+
+// Alias for components that expect getPurchaseOrders
+export const getPurchaseOrders = getPurchaseOrder;
 
 export async function getAppointments(): Promise<Appointment[]> {
     return fetchData<Appointment[]>('appointments');

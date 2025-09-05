@@ -25,10 +25,10 @@ export default function BestSellerCard({ year }: BestSellerCardProps) {
             const salesByProduct: Record<string, number> = {};
 
             invoices
-                .filter(invoice => new Date(invoice.issueDate).getFullYear() === year && invoice.status === 'Paid')
-                .forEach(invoice => {
-                    invoice.items.forEach(item => {
-                        if (products.find(p => p.id === item.productId)?.type === 'Eyewear') {
+                .filter((invoice: Invoice) => new Date(invoice.issueDate).getFullYear() === year && invoice.status === 'Paid')
+                .forEach((invoice: Invoice) => {
+                    invoice.items.forEach((item: any) => {
+                        if (products.find((p: Product) => p.id === item.productId)?.type === 'Eyewear') {
                            salesByProduct[item.productId] = (salesByProduct[item.productId] || 0) + item.quantity;
                         }
                     });
@@ -41,7 +41,7 @@ export default function BestSellerCard({ year }: BestSellerCardProps) {
             }
 
             const bestSellerId = Object.keys(salesByProduct).reduce((a, b) => salesByProduct[a] > salesByProduct[b] ? a : b, '');
-            const product = products.find(p => p.id === bestSellerId);
+            const product = products.find((p: Product) => p.id === bestSellerId);
 
             if (product) {
                 setBestSeller({

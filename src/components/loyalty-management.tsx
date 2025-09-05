@@ -115,7 +115,7 @@ export function LoyaltyManagement() {
         async function fetchData() {
             setIsLoading(true);
             const data = await getPatients();
-            const patients = (data as Patient[]).map(p => ({
+            const patients = (data as Patient[]).map((p: Patient) => ({
                 ...p,
                 loyaltyTier: p.loyaltyTier || getLoyaltyTier(p.loyaltyPoints || 0)
             }));

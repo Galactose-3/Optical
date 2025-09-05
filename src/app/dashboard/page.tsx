@@ -1115,8 +1115,8 @@ function ReportsSection() {
                 { label: 'Total Cost', key: 'totalValue' },
             ];
             const purchaseMap = new Map();
-            purchaseOrders.forEach(po => {
-                po.items.forEach(item => {
+            purchaseOrders.forEach((po: any) => {
+                po.items.forEach((item: any) => {
                     const existing = purchaseMap.get(item.productId);
                     if (existing) {
                         existing.quantity += item.quantity;
@@ -1251,7 +1251,7 @@ export default function UnifiedDashboard() {
                 }
             }
             if (role === 'staff' || role === 'owner') {
-                const prods = await getProduct();
+                const prods = await getProducts();
                 setProducts(prods);
             }
             setIsLoading(false);
