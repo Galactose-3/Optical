@@ -29,7 +29,7 @@ import { useCurrency } from '@/context/currency-context';
 import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
 import BarcodeScanner from './barcode-scanner';
 import { ScrollArea } from './ui/scroll-area';
-import { getProducts } from '@/lib/api';
+import { getProduct } from '@/lib/api';
 import { Skeleton } from './ui/skeleton';
 
 const invoiceItemSchema = z.object({
@@ -99,7 +99,7 @@ export function InvoiceForm({ onCreate }: InvoiceFormProps) {
     React.useEffect(() => {
         async function fetchData() {
             setIsLoading(true);
-            const prods = await getProducts();
+            const prods = await getProduct();
             setProducts(prods);
             setIsLoading(false);
         }

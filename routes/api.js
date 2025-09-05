@@ -418,4 +418,171 @@ router.get('/admin-payment-notices', function(req, res) {
   res.json(adminPaymentNotices);
 });
 
+// -------------------------------------------------------------
+// Additional Endpoints: Customers, Prescriptions, Walk-in Invoice
+// -------------------------------------------------------------
+
+// In-memory stores
+let customers = [
+  {
+    id: 1,
+    name: 'Jane Smith',
+    phone: '+91-9876543210',
+    address: '456 Oak Ave, Sometown, USA',
+    createdAt: new Date('2025-09-04T10:30:00.000Z').toISOString(),
+    updatedAt: new Date('2025-09-04T10:30:00.000Z').toISOString(),
+  },
+];
+
+let prescriptions = [
+  {
+    id: 1,
+    patientId: 1,
+    rightEye: { sph: -1.25, cyl: -0.5, axis: 180, add: 0, pd: 32, bc: 8.6 },
+    leftEye: { sph: -1.5, cyl: -0.75, axis: 170, add: 0, pd: 32, bc: 8.6 },
+    createdAt: new Date('2025-09-04T10:35:00.000Z').toISOString(),
+    updatedAt: new Date('2025-09-04T10:35:00.000Z').toISOString(),
+  },
+];
+
+let nextIds = { customer: 2, prescription: 2 };
+
+function paginate(list, page = 1, limit = 10) {
+  const p = Math.max(parseInt(page) || 1, 1);
+  const l = Math.max(parseInt(limit) || 10, 1);
+  const start = (p - 1) * l;
+  const end = start + l;
+  const total = list.length;
+  const totalPages = Math.max(Math.ceil(total / l), 1);
+  return { data: list.slice(start, end), total, page: p, totalPages };
+}
+
+// Create Customer
+router.post('/customer', function(req, res) {
+  const { name, phone, address } = req.body || {};
+  if (!name) return res.status(400).json({ error: 'name is required' });
+  const now = new Date().toISOString();
+  const customer = { id: nextIds.customer++, name, phone, address, createdAt: now, updatedAt: now };
+  customers.push(customer);
+  res.status(201).json(customer);
+});
+
+// Get All Customers with pagination and optional search
+router.get('/customer', function(req, res) {
+  const { page = '1', limit = '10', search = '' } = req.query;
+  const s = String(search).toLowerCase();
+  const filtered = s ? customers.filter(c => c.name.toLowerCase().includes(s)) : customers;
+  const { data, total, totalPages, page: p } = paginate(filtered, page, limit);
+  res.json({ customers: data, total, page: p, totalPages });
+});
+
+// Get Single Customer with invoices
+router.get('/customer/:id', function(req, res) {
+  const id = parseInt(req.params.id);
+  const customer = customers.find(c => c.id === id);
+  if (!customer) return res.status(404).json({ error: 'Customer not found' });
+  // Map demo invoices for this customer from existing invoices mock by name or patientId if present
+  const relatedInvoices = invoices
+    .filter(inv => inv.patientName === customer.name || inv.patientId === String(id))
+    .map(inv => ({
+      id: inv.id,
+      totalAmount: inv.total,
+      status: inv.status?.toUpperCase?.() || 'PAID',
+      items: inv.items?.map(it => ({
+        id: it.productId,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        product: { name: it.productName },
+      })) || [],
+    }));
+  res.json({ id: customer.id, name: customer.name, phone: customer.phone, address: customer.address, invoices: relatedInvoices });
+});
+
+// Hotspots aggregation (demo)
+router.get('/customer/hotspots', function(req, res) {
+  const hotspots = [
+    { address: 'Main Street', customerCount: 15 },
+    { address: 'Oak Avenue', customerCount: 12 },
+  ];
+  res.json(hotspots);
+});
+
+// Create Patient (basic - no auth enforcement for now)
+router.post('/patient', function(req, res) {
+  const { name, age, gender, phone, address, medicalHistory } = req.body || {};
+  if (!name || !age || !gender) return res.status(400).json({ error: 'name, age, gender are required' });
+  const newId = `PAT${String(patients.length + 1).padStart(3, '0')}`;
+  const now = new Date().toISOString();
+  const patient = { id: newId, name, email: '', phone: phone || '', address: { city: address || '', state: '' }, insuranceProvider: '', insurancePolicyNumber: '', prescription: { sphere: { right: 0, left: 0 }, cylinder: { right: 0, left: 0 }, axis: { right: 0, left: 0 }, add: { right: 0, left: 0 } }, lastVisit: now, shopId: 'SHOP001' };
+  patients.push(patient);
+  res.status(201).json({ id: patients.length, name, age, gender, phone, address, medicalHistory });
+});
+
+// Create Prescription
+router.post('/prescription', function(req, res) {
+  const { patientId, rightEye, leftEye } = req.body || {};
+  if (!patientId || !rightEye || !leftEye) return res.status(400).json({ error: 'patientId, rightEye, leftEye are required' });
+  const now = new Date().toISOString();
+  const record = { id: nextIds.prescription++, patientId: Number(patientId), rightEye, leftEye, createdAt: now, updatedAt: now };
+  prescriptions.push(record);
+  const patient = patients.find(p => p.id === String(patientId)) || null;
+  res.status(201).json({ ...record, patient: patient ? { id: patientId, name: patient.name } : undefined });
+});
+
+// Get All Prescriptions (pagination + optional patientId filter)
+router.get('/prescription', function(req, res) {
+  const { page = '1', limit = '10', patientId } = req.query;
+  const list = patientId ? prescriptions.filter(pr => String(pr.patientId) === String(patientId)) : prescriptions;
+  const { data, total, totalPages, page: p } = paginate(list, page, limit);
+  const enriched = data.map(pr => {
+    const patient = patients.find(pt => String(pt.id) === String(pr.patientId));
+    return { ...pr, patient: patient ? { id: pr.patientId, name: patient.name } : undefined };
+  });
+  res.json({ prescriptions: enriched, total, page: p, totalPages });
+});
+
+// Get Single Prescription
+router.get('/prescription/:id', function(req, res) {
+  const id = parseInt(req.params.id);
+  const pr = prescriptions.find(x => x.id === id);
+  if (!pr) return res.status(404).json({ error: 'Prescription not found' });
+  const patient = patients.find(pt => String(pt.id) === String(pr.patientId));
+  res.json({ ...pr, patient: patient ? { id: pr.patientId, name: patient.name } : undefined });
+});
+
+// Create Customer + Invoice (Walk-in)
+router.post('/customer/invoice', function(req, res) {
+  const { customer, items, paymentMethod = 'cash', staffId = 1, paidAmount = 0, discount = 0 } = req.body || {};
+  if (!customer || !Array.isArray(items)) return res.status(400).json({ error: 'customer and items are required' });
+
+  // Create or reuse customer
+  const now = new Date().toISOString();
+  const createdCustomer = {
+    id: nextIds.customer++,
+    name: customer.name || 'Walk-in Customer',
+    phone: customer.phone || '',
+    address: customer.address || '',
+    createdAt: now,
+    updatedAt: now,
+  };
+  customers.push(createdCustomer);
+
+  // Create a simple invoice summary
+  const totalAmount = items.reduce((sum, it) => sum + (Number(it.unitPrice) * Number(it.quantity || 1)), 0) - Number(discount || 0);
+  const invoice = {
+    id: 'INV-' + Date.now(),
+    staffId,
+    paymentMethod,
+    paidAmount,
+    totalAmount,
+    status: paidAmount >= totalAmount ? 'PAID' : 'UNPAID',
+    items: items.map((it, idx) => ({ id: idx + 1, quantity: it.quantity || 1, unitPrice: Number(it.unitPrice) || 0, product: { name: it.product?.name || 'Item' } })),
+    createdAt: now,
+    updatedAt: now,
+    customer: createdCustomer,
+  };
+
+  res.status(201).json(invoice);
+});
+
 module.exports = router;

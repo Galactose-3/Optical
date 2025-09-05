@@ -51,6 +51,13 @@ const rewards = [
     { points: 500, description: '$10 off contact lenses' },
 ];
 
+const getLoyaltyTier = (points: number): LoyaltyTier => {
+    if (points >= 3000) return 'Platinum';
+    if (points >= 2000) return 'Gold';
+    if (points >= 1000) return 'Silver';
+    return 'Bronze';
+};
+
 function MembershipCard({ patient }: { patient: Patient }) {
     const tier = patient.loyaltyTier || 'Bronze';
     const styles = tierStyles[tier];
@@ -108,7 +115,11 @@ export function LoyaltyManagement() {
         async function fetchData() {
             setIsLoading(true);
             const data = await getPatients();
-            setPatientList(data);
+            const patients = (data as Patient[]).map(p => ({
+                ...p,
+                loyaltyTier: p.loyaltyTier || getLoyaltyTier(p.loyaltyPoints || 0)
+            }));
+            setPatientList(patients);
             setIsLoading(false);
         }
         fetchData();
@@ -116,7 +127,7 @@ export function LoyaltyManagement() {
 
     const handleAddPoints = (patientId: string) => {
         const points = pointsToAdd[patientId];
-        if (!points || points <= 0) {
+        if (!points || points <= 0 || isNaN(points)) {
             toast({
                 variant: 'destructive',
                 title: 'Invalid Points',
@@ -125,15 +136,21 @@ export function LoyaltyManagement() {
             return;
         }
 
-        setPatientList(prev => prev.map(p => 
-            p.id === patientId ? { ...p, loyaltyPoints: (p.loyaltyPoints || 0) + points } : p
-        ));
-        
+        const patientName = patientList.find(p => p.id === patientId)?.name;
+
+        setPatientList(prev => prev.map(p => {
+            if (p.id === patientId) {
+                const newPoints = (p.loyaltyPoints || 0) + points;
+                return { ...p, loyaltyPoints: newPoints, loyaltyTier: getLoyaltyTier(newPoints) };
+            }
+            return p;
+        }));
+
         setPointsToAdd(prev => ({...prev, [patientId]: 0}));
 
         toast({
             title: "Points Added",
-            description: `Successfully added ${points} points to ${patientList.find(p=>p.id === patientId)?.name}.`
+            description: `Successfully added ${points} points to ${patientName}.`
         })
     };
     
