@@ -45,9 +45,9 @@ async function postData<T>(endpoint: string, data: any): Promise<T> {
     return res.json();
 }
 
-export async function getPatient(): Promise<Patient[]> {
-    return fetchData<Patient[]>('patients');
-}
+export async function getPatients(): Promise<Patient[]> {
+     return fetchData<Patient[]>('patients');
+ }
 
 export async function getProduct(): Promise<Product[]> {
     return fetchData<Product[]>('products');

@@ -6,7 +6,7 @@ import type { Product, Invoice } from '@/lib/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
 import { Crown } from 'lucide-react';
-import { getProducts, getInvoices } from '@/lib/api';
+import { getProduct, getInvoice } from '@/lib/api';
 import { Skeleton } from './ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Label } from './ui/label';
@@ -65,7 +65,7 @@ export default function BestSellerByPriceRange() {
     React.useEffect(() => {
         async function fetchData() {
             setIsLoading(true);
-            const [productsData, invoicesData] = await Promise.all([getProducts(), getInvoices()]);
+            const [productsData, invoicesData] = await Promise.all([getProduct(), getInvoice()]);
             setProducts(productsData);
             setInvoices(invoicesData);
             setIsLoading(false);

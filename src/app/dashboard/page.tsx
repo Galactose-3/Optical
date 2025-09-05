@@ -1251,7 +1251,7 @@ export default function UnifiedDashboard() {
                 }
             }
             if (role === 'staff' || role === 'owner') {
-                const prods = await getProducts();
+                const prods = await getProduct();
                 setProducts(prods);
             }
             setIsLoading(false);

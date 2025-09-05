@@ -11,7 +11,7 @@ import type { Patient, LoyaltyTier } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { getPatients } from '@/lib/api';
+import { getPatients } from '../lib/api';
 import { Skeleton } from './ui/skeleton';
 import Logo from './logo';
 
