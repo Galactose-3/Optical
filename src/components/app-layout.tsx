@@ -6,9 +6,9 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
-  LogOut,
-  PanelLeft,
-  Music,
+    LogOut,
+    PanelLeft,
+    Music,
 } from 'lucide-react';
 import Logo from '@/components/logo';
 import { ScrollArea } from './ui/scroll-area';
@@ -37,7 +37,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         document.cookie = "patientId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         navigate('/login');
     };
-    
+
     if (pathname === '/') {
         return <>{children}</>;
     }
@@ -49,35 +49,35 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     <Logo />
                 </nav>
                 <Sheet>
-                <SheetTrigger asChild>
-                    <Button size="icon" variant="outline" className="sm:hidden">
-                    <PanelLeft className="h-5 w-5" />
-                    <span className="sr-only">Toggle Menu</span>
-                    </Button>
-                </SheetTrigger>
-                <SheetContent side="left" className="sm:max-w-xs p-0">
-                    <div className="flex h-16 items-center border-b px-6">
-                        <Logo />
-                    </div>
-                    <ScrollArea className="h-[calc(100vh-120px)]">
-                        <nav className="grid gap-6 text-lg font-medium p-4">
-                            
-                        </nav>
-                    </ScrollArea>
-                    <div className="absolute bottom-0 w-full border-t p-4">
-                        <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
-                            <LogOut className="mr-2 h-5 w-5" />
-                            {t('logout')}
+                    <SheetTrigger asChild>
+                        <Button size="icon" variant="outline" className="sm:hidden">
+                            <PanelLeft className="h-5 w-5" />
+                            <span className="sr-only">Toggle Menu</span>
                         </Button>
-                    </div>
-                </SheetContent>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="sm:max-w-xs p-0">
+                        <div className="flex h-16 items-center border-b px-6">
+                            <Logo />
+                        </div>
+                        <ScrollArea className="h-[calc(100vh-120px)]">
+                            <nav className="grid gap-6 text-lg font-medium p-4">
+
+                            </nav>
+                        </ScrollArea>
+                        <div className="absolute bottom-0 w-full border-t p-4">
+                            <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
+                                <LogOut className="mr-2 h-5 w-5" />
+                                {t('logout')}
+                            </Button>
+                        </div>
+                    </SheetContent>
                 </Sheet>
                 <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
                     <div className="ml-auto flex items-center gap-2">
                         <LanguageSwitcher />
                         {userRole !== 'doctor' && userRole !== 'patient' && <CurrencySwitcher />}
                         <ThemeSwitcher />
-                         {userRole === 'admin' && (
+                        {userRole === 'admin' && (
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button variant="ghost" size="icon">
@@ -96,9 +96,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </Button>
                 </div>
             </header>
-            <main className="flex flex-1 flex-col gap-4 p-4 pt-20 md:gap-8 md:p-6 lg:p-8 md:pt-24">
+            <main className="flex flex-1 flex-col gap-10 p-4 pt-20 md:gap-10 md:p-6 lg:p-10 md:pt-50">
                 {children}
             </main>
-      </div>
+        </div>
     );
 }
