@@ -476,6 +476,15 @@ router.get('/customer', function(req, res) {
   res.json({ customers: data, total, page: p, totalPages });
 });
 
+// Hotspots aggregation (demo)
+router.get('/customer/hotspots', function(req, res) {
+  const hotspots = [
+    { address: 'Main Street', customerCount: 15 },
+    { address: 'Oak Avenue', customerCount: 12 },
+  ];
+  res.json(hotspots);
+});
+
 // Get Single Customer with invoices
 router.get('/customer/:id', function(req, res) {
   const id = parseInt(req.params.id);
@@ -496,15 +505,6 @@ router.get('/customer/:id', function(req, res) {
       })) || [],
     }));
   res.json({ id: customer.id, name: customer.name, phone: customer.phone, address: customer.address, invoices: relatedInvoices });
-});
-
-// Hotspots aggregation (demo)
-router.get('/customer/hotspots', function(req, res) {
-  const hotspots = [
-    { address: 'Main Street', customerCount: 15 },
-    { address: 'Oak Avenue', customerCount: 12 },
-  ];
-  res.json(hotspots);
 });
 
 // Create Patient (basic - no auth enforcement for now)

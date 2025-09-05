@@ -138,10 +138,36 @@ const adminPaymentNotices = [
     }
 ];
 
+// In-memory stores for new endpoints
+let customers = [
+  {
+    id: 1,
+    name: 'Jane Smith',
+    phone: '+91-9876543210',
+    address: '456 Oak Ave, Sometown, USA',
+    createdAt: new Date('2025-09-04T10:30:00.000Z').toISOString(),
+    updatedAt: new Date('2025-09-04T10:30:00.000Z').toISOString(),
+  },
+];
+
+let prescriptions = [
+  {
+    id: 1,
+    patientId: 1,
+    rightEye: { sph: -1.25, cyl: -0.5, axis: 180, add: 0, pd: 32, bc: 8.6 },
+    leftEye: { sph: -1.5, cyl: -0.75, axis: 170, add: 0, pd: 32, bc: 8.6 },
+    createdAt: new Date('2025-09-04T10:35:00.000Z').toISOString(),
+    updatedAt: new Date('2025-09-04T10:35:00.000Z').toISOString(),
+  },
+];
+
+let nextIds = { customer: 2, prescription: 2, patient: 3 };
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Original endpoints
 app.get('/api/patients', (req, res) => res.json(patients));
 app.get('/api/products', (req, res) => res.json(products));
 app.get('/api/invoices', (req, res) => res.json(invoices));
@@ -152,5 +178,190 @@ app.get('/api/doctors', (req, res) => res.json(doctors));
 app.get('/api/admins', (req, res) => res.json(admins));
 app.get('/api/staff', (req, res) => res.json(staff));
 app.get('/api/admin-payment-notices', (req, res) => res.json(adminPaymentNotices));
+
+// New endpoints as requested
+
+// Patient endpoints
+app.post('/api/patient', (req, res) => {
+  const { name, age, gender, phone, address, medicalHistory } = req.body;
+  if (!name || !age || !gender) {
+    return res.status(400).json({ error: 'name, age, gender are required' });
+  }
+  const newId = `PAT${String(nextIds.patient++).padStart(3, '0')}`;
+  const patient = {
+    id: newId,
+    name,
+    email: '',
+    phone: phone || '',
+    address: { city: address || '', state: '' },
+    insuranceProvider: '',
+    insurancePolicyNumber: '',
+    prescription: { sphere: { right: 0, left: 0 }, cylinder: { right: 0, left: 0 }, axis: { right: 0, left: 0 }, add: { right: 0, left: 0 } },
+    lastVisit: new Date().toISOString().split('T')[0],
+    shopId: 'SHOP001'
+  };
+  patients.push(patient);
+  res.status(201).json({ id: patients.length, name, age, gender, phone, address, medicalHistory });
+});
+
+// Prescription endpoints
+app.post('/api/prescription', (req, res) => {
+  const { patientId, rightEye, leftEye } = req.body;
+  if (!patientId || !rightEye || !leftEye) {
+    return res.status(400).json({ error: 'patientId, rightEye, leftEye are required' });
+  }
+  const now = new Date().toISOString();
+  const prescription = {
+    id: nextIds.prescription++,
+    patientId: Number(patientId),
+    rightEye,
+    leftEye,
+    createdAt: now,
+    updatedAt: now
+  };
+  prescriptions.push(prescription);
+  res.status(201).json(prescription);
+});
+
+app.get('/api/prescription', (req, res) => {
+  const { page = 1, limit = 10, patientId } = req.query;
+  let filtered = prescriptions;
+
+  if (patientId) {
+    filtered = prescriptions.filter(p => p.patientId === Number(patientId));
+  }
+
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + Number(limit);
+  const paginated = filtered.slice(startIndex, endIndex);
+
+  res.json({
+    prescriptions: paginated,
+    total: filtered.length,
+    page: Number(page),
+    totalPages: Math.ceil(filtered.length / Number(limit))
+  });
+});
+
+app.get('/api/prescription/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const prescription = prescriptions.find(p => p.id === id);
+  if (!prescription) {
+    return res.status(404).json({ error: 'Prescription not found' });
+  }
+  res.json(prescription);
+});
+
+// Customer endpoints
+app.post('/api/customer', (req, res) => {
+  const { name, phone, address } = req.body;
+  if (!name) {
+    return res.status(400).json({ error: 'name is required' });
+  }
+  const now = new Date().toISOString();
+  const customer = {
+    id: nextIds.customer++,
+    name,
+    phone: phone || '',
+    address: address || '',
+    createdAt: now,
+    updatedAt: now
+  };
+  customers.push(customer);
+  res.status(201).json(customer);
+});
+
+app.get('/api/customer', (req, res) => {
+  const { page = 1, limit = 10, search = '' } = req.query;
+  let filtered = customers;
+
+  if (search) {
+    filtered = customers.filter(c => c.name.toLowerCase().includes(search.toLowerCase()));
+  }
+
+  const startIndex = (page - 1) * Number(limit);
+  const endIndex = startIndex + Number(limit);
+  const paginated = filtered.slice(startIndex, endIndex);
+
+  res.json({
+    customers: paginated,
+    total: filtered.length,
+    page: Number(page),
+    totalPages: Math.ceil(filtered.length / Number(limit))
+  });
+});
+
+app.get('/api/customer/:id', (req, res) => {
+  const id = Number(req.params.id);
+  const customer = customers.find(c => c.id === id);
+  if (!customer) {
+    return res.status(404).json({ error: 'Customer not found' });
+  }
+  // Mock invoices for this customer
+  const relatedInvoices = invoices.filter(inv => inv.patientName === customer.name);
+  res.json({
+    ...customer,
+    invoices: relatedInvoices.map(inv => ({
+      id: inv.id,
+      totalAmount: inv.total,
+      status: inv.status?.toUpperCase() || 'PAID',
+      items: inv.items?.map(it => ({
+        id: it.productId,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        product: { name: it.productName }
+      })) || []
+    }))
+  });
+});
+
+app.get('/api/customer/hotspots', (req, res) => {
+  const hotspots = [
+    { address: 'Main Street', customerCount: 15 },
+    { address: 'Oak Avenue', customerCount: 12 },
+  ];
+  res.json(hotspots);
+});
+
+// Walk-in invoice endpoint
+app.post('/api/customer/invoice', (req, res) => {
+  const { customer, items, paymentMethod = 'cash', staffId = 1, paidAmount = 0, discount = 0 } = req.body;
+  if (!customer || !Array.isArray(items)) {
+    return res.status(400).json({ error: 'customer and items are required' });
+  }
+
+  // Create customer if not exists
+  const createdCustomer = {
+    id: nextIds.customer++,
+    name: customer.name || 'Walk-in Customer',
+    phone: customer.phone || '',
+    address: customer.address || '',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  customers.push(createdCustomer);
+
+  // Create invoice
+  const totalAmount = items.reduce((sum, it) => sum + (Number(it.unitPrice) * Number(it.quantity || 1)), 0) - Number(discount || 0);
+  const invoice = {
+    id: 'INV-' + Date.now(),
+    staffId,
+    paymentMethod,
+    paidAmount,
+    totalAmount,
+    status: paidAmount >= totalAmount ? 'PAID' : 'UNPAID',
+    items: items.map((it, idx) => ({
+      id: idx + 1,
+      quantity: it.quantity || 1,
+      unitPrice: Number(it.unitPrice) || 0,
+      product: { name: it.product?.name || 'Item' }
+    })),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    customer: createdCustomer
+  };
+
+  res.status(201).json(invoice);
+});
 
 module.exports = app;
