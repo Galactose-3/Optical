@@ -191,7 +191,7 @@ function AdminDashboard() {
   
   const allStaff = [...staff, ...doctors];
 
-  const [paymentNotice, setPaymentNotice] = React.useState<any>(null);
+  const [paymentNotice, setPaymentNotice] = React.useState(null);
   const [lockout, setLockout] = React.useState(false);
   const [daysLeft, setDaysLeft] = React.useState(0);
 
@@ -478,7 +478,7 @@ function OwnerDashboard() {
 function StaffDashboard() {
   const [lastLogin, setLastLogin] = React.useState(null);
   const { formatCurrency, registerValue, convertedValues } = useCurrency();
-  const [recentInvoices, setRecentInvoices] = React.useState<Invoice[]>([]);
+  const [recentInvoices, setRecentInvoices] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
   
   React.useEffect(() => {
@@ -567,16 +567,16 @@ function DoctorDashboard() {
     }, []);
 
      const handleAddPatient = (newPatientData) => {
-        const newPatient: Patient = {
-            id: `PAT-${Date.now()}`,
-            lastVisit: new Date().toISOString().split('T')[0],
-            address: newPatientData.address || { city: 'Unknown', state: ''},
-            shopId: 'SHOP001', // default for new patients
-            ...newPatientData
-        }
-        setPatients(prev => [newPatient, ...prev]);
-        setAddPatientOpen(false);
-    }
+         const newPatient = {
+             id: `PAT-${Date.now()}`,
+             lastVisit: new Date().toISOString().split('T')[0],
+             address: newPatientData.address || { city: 'Unknown', state: ''},
+             shopId: 'SHOP001', // default for new patients
+             ...newPatientData
+         }
+         setPatients(prev => [newPatient, ...prev]);
+         setAddPatientOpen(false);
+     }
 
     return (
         <div className="space-y-8">

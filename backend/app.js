@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // Serve React frontend build
-app.use(express.static(path.join(__dirname, 'dist')));
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // API routes
 app.use('/api', apiRouter);
@@ -30,7 +30,7 @@ app.use('/', indexRouter);
 
 // Catch-all: send back React index.html for any other route
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  res.sendFile(path.join(__dirname, '../frontend/dist', 'index.html'));
 });
 
 // Error handling
@@ -50,7 +50,7 @@ module.exports = app;
 
 // For local development
 if (require.main === module) {
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 3001;
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });

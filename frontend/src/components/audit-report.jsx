@@ -147,7 +147,7 @@ export default function AuditReport({ detailed = false }) {
     }, [selectedBrand, filteredInvoices, products]);
 
     const brandSalesData = React.useMemo(() => {
-        const brandSales = new Map<string, number>();
+        const brandSales = new Map();
 
         filteredInvoices.forEach(invoice => {
             if (invoice.status === 'Paid') {
